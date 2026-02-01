@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Crypto Bot Dashboard</title>
+
+		<style>
+			body {
+				font-family: Arial, Helvetica, sans-serif;
+				background: #0f172a;
+				color: #949596;
+				margin: 0;
+				padding: 0;
+			}
+
+			header {
+				background: #020617;
+				padding: 16px 24px;
+				font-size: 20px;
+				font-weight: bold;
+				border-bottom: 1px solid #1e293b;
+			}
+
+			.container {
+				padding: 24px;
+				max-width: 1100px;
+				margin: auto;
+			}
+
+			.status {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				margin-bottom: 24px;
+			}
+
+			.dot {
+				width: 12px;
+				height: 12px;
+				border-radius: 50%;
+				background: gray;
+			}
+
+			.dot.on {
+				background: #22c55e;
+			}
+			.dot.off {
+				background: #ef4444;
+			}
+
+			.controls {
+				display: flex;
+				gap: 12px;
+				margin-bottom: 32px;
+			}
+
+			button {
+				padding: 10px 16px;
+				font-size: 14px;
+				border-radius: 6px;
+				border: none;
+				cursor: pointer;
+				font-weight: bold;
+			}
+
+			.start {
+				background: #22c55e;
+				color: #022c22;
+			}
+
+			.mp {
+				margin-top: 5px;
+			}
+
+			.stop {
+				background: #ef4444;
+				color: #450a0a;
+			}
+
+			.cards {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 24px;
+			}
+
+			.card {
+				background: #020617;
+				padding: 16px;
+				border-radius: 8px;
+				border: 1px solid #1e293b;
+			}
+
+			.card h3 {
+				margin-top: 0;
+				margin-bottom: 12px;
+				font-size: 16px;
+				border-bottom: 1px solid #1e293b;
+				padding-bottom: 3px;
+			}
+
+			pre {
+				background: #020617;
+				padding: 12px;
+				border-radius: 6px;
+				max-height: 300px;
+				overflow: auto;
+				font-size: 12px;
+			}
+
+			label {
+				display: block;
+				margin-top: 12px;
+				margin-bottom: 4px;
+				font-size: 13px;
+			}
+
+			input {
+				width: 100%;
+				padding: 8px;
+				border-radius: 6px;
+				border: 1px solid #1e293b;
+				background: #020617;
+				color: #aeafb1;
+				font-size: 14px;
+			}
+
+			input:focus {
+				outline: none;
+				border-color: #22c55e;
+			}
+
+			.section {
+				margin-bottom: 16px;
+				padding-bottom: 10px;
+				border-bottom: 1px solid #1e293b;
+			}
+
+			.section:last-child {
+				border-bottom: none;
+			}
+
+			.section strong {
+				display: block;
+				margin-bottom: 6px;
+				color: #93c5fd;
+			}
+
+			.positive {
+				color: #22c55e;
+				font-weight: bold;
+			}
+
+			.negative {
+				color: #ef4444;
+				font-weight: bold;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 13px;
+			}
+
+			th,
+			td {
+				padding: 8px;
+				border-bottom: 1px solid #1e293b;
+				text-align: right;
+			}
+
+			th {
+				text-align: right;
+				color: #93c5fd;
+			}
+
+			th:first-child,
+			td:first-child {
+				text-align: left;
+			}
+
+			tbody tr:hover {
+				background: #020617;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header>🤖 Crypto Bot Dashboard</header>
+
+		<div class="container">
+			<div class="status">
+				<div id="statusDot" class="dot off"></div>
+				<div id="statusText">Bot desligado</div>
+			</div>
+
+			<div class="controls">
+				<button class="start" onclick="startBot()">▶ Iniciar</button>
+				<button class="stop" onclick="stopBot()">⏸ Parar</button>
+			</div>
+
+			<div class="cards">
+				<div class="card">
+					<h3>Resumo Financeiro</h3>
+
+					<div class="section">
+						<strong>Compras</strong>
+						<div>Quantidade: <span id="buyCount"></span></div>
+						<div>Valor total: <span id="buyValue"></span></div>
+					</div>
+
+					<div class="section">
+						<strong>Vendas</strong>
+						<div>Quantidade: <span id="sellCount"></span></div>
+						<div>Valor total: <span id="sellValue"></span></div>
+					</div>
+
+					<div class="section">
+						<strong>Resultado</strong>
+						<div>Lucro líquido: <span id="netProfitValue"></span></div>
+						<div>Taxas pagas: <span id="fees"></span></div>
+						<div>IR estimado: <span id="ir"></span></div>
+					</div>
+				</div>
+
+				<div class="card">
+					<h3>Estado de Mercado</h3>
+
+					<div class="section">
+						<strong>Mercado</strong>
+						<div>Preço atual: <span id="currentPrice"></span></div>
+						<div>Preço âncora: <span id="anchorPrice"></span></div>
+						<div>Variação vs âncora: <span id="anchorVariation"></span></div>
+					</div>
+
+					<div class="section">
+						<strong>Próxima ação</strong>
+						<div>Compra esperada em: <span id="nextBuy"></span></div>
+						<div>Venda esperada em: <span id="nextSell"></span></div>
+					</div>
+				</div>
+
+				<div class="card">
+					<h3>Configuração do Bot</h3>
+
+					<label>% do saldo por compra</label>
+					<input id="buyPct" type="number" step="0.01" />
+
+					<label>Lucro líquido alvo (%)</label>
+					<input id="netProfitInput" type="number" step="0.01" />
+
+					<label>Lucro bruto (%)</label>
+					<input id="grossProfitInput" type="number" step="0.01" />
+
+					<label>Intervalo do ciclo (ms)</label>
+					<input id="cycleMs" type="number" step="1000" />
+
+					<button class="start mt" onclick="saveConfig()">💾 Salvar Configuração</button>
+				</div>
+
+				<div class="card">
+					<h3>Posições Abertas</h3>
+
+					<table id="positionsTable">
+						<thead>
+							<tr>
+								<th>Status</th>
+								<th>Compra</th>
+								<th>Venda alvo</th>
+								<th>Quantidade</th>
+								<th>Investido</th>
+								<th>Lucro esp.</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+
+					<div id="noPositions" style="display: none; opacity: 0.7">
+						Nenhuma posição aberta no momento.
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			async function startBot() {
+				await fetch("/start", { method: "POST" })
+				loadStatus()
+			}
+
+			async function stopBot() {
+				await fetch("/stop", { method: "POST" })
+				loadStatus()
+			}
+
+			async function saveConfig() {
+				const body = {
+					buyPercentageOfBalance: Number(document.getElementById("buyPct").value),
+					targetNetProfit: Number(document.getElementById("netProfitInput").value) / 100,
+					grossTargetPercentage:
+						Number(document.getElementById("grossProfitInput").value) / 100,
+
+					cycleIntervalMs: Number(document.getElementById("cycleMs").value),
+				}
+
+				await fetch("/config", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(body),
+				})
+
+				alert("Configuração salva")
+				loadStatus()
+			}
+
+			async function loadStatus() {
+				const res = await fetch("/status")
+				const data = await res.json()
+				const s = data.summary
+				const m = data.strategy
+				const tbody = document.querySelector("#positionsTable tbody")
+				const noPos = document.getElementById("noPositions")
+
+				tbody.innerHTML = ""
+
+				const dot = document.getElementById("statusDot")
+				const text = document.getElementById("statusText")
+
+				if (data.enabled) {
+					dot.className = "dot on"
+					text.innerText = "Bot em execução"
+				} else {
+					dot.className = "dot off"
+					text.innerText = "Bot desligado"
+				}
+
+				// preencher formulário
+				//document.getElementById("market").innerText = JSON.stringify(data.strategy, null, 2)
+				// Preço atual
+				document.getElementById("currentPrice").innerText = m.currentPrice
+					? `${m.currentPrice.toFixed(2)} USDT`
+					: "-"
+
+				// Âncora
+				document.getElementById("anchorPrice").innerText = m.anchorPrice
+					? `${m.anchorPrice.toFixed(2)} USDT`
+					: "-"
+
+				// Variação percentual vs âncora
+				if (m.currentPrice && m.anchorPrice) {
+					const variation = ((m.currentPrice - m.anchorPrice) / m.anchorPrice) * 100
+
+					const el = document.getElementById("anchorVariation")
+					el.innerText = `${variation.toFixed(2)} %`
+					el.className = variation >= 0 ? "positive" : "negative"
+				} else {
+					document.getElementById("anchorVariation").innerText = "-"
+				}
+
+				// Próxima compra
+				document.getElementById("nextBuy").innerText = m.nextBuyPrice
+					? `${m.nextBuyPrice.toFixed(2)} USDT`
+					: "-"
+
+				// Próxima venda
+				document.getElementById("nextSell").innerText = m.nextSellPrice
+					? `${m.nextSellPrice.toFixed(2)} USDT`
+					: "Não existe venda em aberto."
+
+				document.getElementById("buyPct").value = data.config.buyPercentageOfBalance
+
+				document.getElementById("buyCount").innerText = s.compras.quantidade
+
+				document.getElementById("buyValue").innerText =
+					`${s.compras.valorTotal.toFixed(2)} USDT`
+
+				document.getElementById("sellCount").innerText = s.vendas.quantidade
+
+				document.getElementById("sellValue").innerText =
+					`${s.vendas.valorTotal.toFixed(2)} USDT`
+
+				const netProfitEl = document.getElementById("netProfitValue")
+				netProfitEl.innerText = `${s.lucroLiquido.toFixed(2)} USDT`
+				netProfitEl.className = s.lucroLiquido >= 0 ? "positive" : "negative"
+
+				document.getElementById("fees").innerText = `${s.totalTaxas.toFixed(2)} USDT`
+
+				document.getElementById("ir").innerText = `${s.totalIR.toFixed(2)} USDT`
+
+				document.getElementById("netProfitInput").value = (
+					data.config.targetNetProfit * 100
+				).toFixed(2)
+
+				document.getElementById("grossProfitInput").value = (
+					data.config.grossTargetPercentage * 100
+				).toFixed(2)
+
+				document.getElementById("cycleMs").value = data.config.cycleIntervalMs
+
+				/* document.getElementById("positions").innerText = JSON.stringify(
+					data.openPositions,
+					null,
+					2,
+				) */
+				if (!data.openPositions || data.openPositions.length === 0) {
+					document.getElementById("positionsTable").style.display = "none"
+					noPos.style.display = "block"
+				} else {
+					document.getElementById("positionsTable").style.display = "table"
+					noPos.style.display = "none"
+
+					data.openPositions.forEach((p) => {
+						const invested = p.buyPrice * p.quantity
+						const expectedProfit = (p.sellPrice - p.buyPrice) * p.quantity
+
+						const tr = document.createElement("tr")
+
+						tr.innerHTML = `
+      <td>${p.status}</td>
+      <td>${p.buyPrice.toFixed(2)}</td>
+      <td>${p.sellPrice.toFixed(2)}</td>
+      <td>${p.quantity}</td>
+      <td>${invested.toFixed(2)} USDT</td>
+      <td class="${expectedProfit >= 0 ? "positive" : "negative"}">
+        ${expectedProfit >= 0 ? "+" : ""}${expectedProfit.toFixed(2)} USDT
+      </td>
+    `
+
+						tbody.appendChild(tr)
+					})
+				}
+			}
+
+			loadStatus()
+			setInterval(loadStatus, 3000)
+		</script>
+	</body>
+</html>
