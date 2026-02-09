@@ -3,7 +3,7 @@ import cors from "cors"
 import { registerRoutes } from "./routes.js"
 import path from "path"
 
-export function startApi(port = 3000) {
+export function startApi(port = 3001) {
 	const app = express()
 	app.use(cors())
 	app.use(express.json())

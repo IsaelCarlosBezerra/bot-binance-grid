@@ -28,4 +28,4 @@ const waitForPrice = setInterval(async () => {
 	console.log("🤖 Bot totalmente operacional")
 }, 1000)
 
-startApi(3000)
+startApi(3001)
