@@ -857,7 +857,7 @@
     "expectedNetProfit": 0.005,
     "id": "7d646b00-011a-46f7-8411-939c2558d3d0",
     "createdAt": 1770592387374,
-    "status": "OPEN"
+    "status": "CLOSED"
   },
   {
     "symbol": "BTCUSDT",
@@ -927,6 +927,286 @@
     "expectedNetProfit": 0.005,
     "id": "4d30de67-b929-4ed6-abe5-452e1b735cd1",
     "createdAt": 1770629845251,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 69301.24,
+    "quantity": 0.00952,
+    "sellPrice": 69855.64992000001,
+    "expectedNetProfit": 0.005,
+    "id": "39efb2c2-af29-4c8b-b9fa-12558ea65967",
+    "createdAt": 1770648828314,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 69272.89,
+    "quantity": 0.00953,
+    "sellPrice": 69827.07312,
+    "expectedNetProfit": 0.005,
+    "id": "89747284-8ab2-48be-93a7-681ee183cb0b",
+    "createdAt": 1770650371399,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 68527.29,
+    "quantity": 0.00867,
+    "sellPrice": 69075.50832,
+    "expectedNetProfit": 0.005,
+    "id": "b1c980e7-fd0b-44af-a92b-52f939a084da",
+    "createdAt": 1770650746798,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 70084.39,
+    "quantity": 0.01048,
+    "sellPrice": 70645.06512,
+    "expectedNetProfit": 0.005,
+    "id": "21852454-177b-4e13-b2d5-4babedcc6fd5",
+    "createdAt": 1770655889558,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 69487.75,
+    "quantity": 0.00951,
+    "sellPrice": 70043.652,
+    "expectedNetProfit": 0.005,
+    "id": "984bfedb-1d82-4ec6-8540-4fcf8e9aeafc",
+    "createdAt": 1770657462413,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 69260.36,
+    "quantity": 0.00954,
+    "sellPrice": 69814.44288,
+    "expectedNetProfit": 0.005,
+    "id": "43ee16e8-3148-413a-85d7-7c01bd11afcf",
+    "createdAt": 1770657607318,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 62423.19,
+    "quantity": 0.0106,
+    "sellPrice": 62922.575520000006,
+    "expectedNetProfit": 0.005,
+    "id": "ba15faf7-86a7-4f11-8f11-d9c1e0b780d1",
+    "createdAt": 1770657682667,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 61424.42,
+    "quantity": 0.00969,
+    "sellPrice": 61915.81536,
+    "expectedNetProfit": 0.005,
+    "id": "f5b8b65e-5e92-4f17-b76b-68adae362259",
+    "createdAt": 1770657687265,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 70664.12,
+    "quantity": 0.01052,
+    "sellPrice": 71229.43295999999,
+    "expectedNetProfit": 0.005,
+    "id": "e3d6a5e1-9ca0-4e5e-b22d-b74a341bf61b",
+    "createdAt": 1770658879300,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 70705.95,
+    "quantity": 0.01052,
+    "sellPrice": 71271.5976,
+    "expectedNetProfit": 0.005,
+    "id": "3fdc3282-193f-4e7e-9c0e-fb4fca2925bc",
+    "createdAt": 1770668188192,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 70137.98,
+    "quantity": 0.00955,
+    "sellPrice": 70699.08383999999,
+    "expectedNetProfit": 0.005,
+    "id": "a0741719-a068-47e3-b678-0f32cd35bd35",
+    "createdAt": 1770672810845,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 70072.46,
+    "quantity": 0.00955,
+    "sellPrice": 70633.03968,
+    "expectedNetProfit": 0.005,
+    "id": "b4c1ebbd-6a35-48b6-8267-f154615f0c1c",
+    "createdAt": 1770672985790,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 69995.86,
+    "quantity": 0.00956,
+    "sellPrice": 70555.82688000001,
+    "expectedNetProfit": 0.005,
+    "id": "349edd49-7296-4756-bd2e-974974c7fc57",
+    "createdAt": 1770673286165,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 70447.6,
+    "quantity": 0.01158,
+    "sellPrice": 71011.1808,
+    "expectedNetProfit": 0.005,
+    "id": "20c6b9da-cf3f-41e0-baaa-d9b450645ace",
+    "createdAt": 1770676761251,
     "status": "OPEN"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 69001.93,
+    "quantity": 0.01064,
+    "sellPrice": 69553.94544,
+    "expectedNetProfit": 0.005,
+    "id": "7d018e0b-02c7-4680-9e83-e38a55ad7791",
+    "createdAt": 1770754182935,
+    "status": "OPEN"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 68432.31,
+    "quantity": 0.00966,
+    "sellPrice": 68979.76848,
+    "expectedNetProfit": 0.005,
+    "id": "f43d3962-1036-4eb6-8337-e958a9d869f8",
+    "createdAt": 1770759113631,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 66995.99,
+    "quantity": 0.00987,
+    "sellPrice": 67531.95792,
+    "expectedNetProfit": 0.005,
+    "id": "60736fc8-c4a5-4e2e-abba-fd6688b83b2c",
+    "createdAt": 1770816134065,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 67541.6,
+    "quantity": 0.0098,
+    "sellPrice": 68081.93280000001,
+    "expectedNetProfit": 0.005,
+    "id": "e9578cc9-3a5f-4ca1-b8ff-a47ef7f5aadb",
+    "createdAt": 1770816829718,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 66976.01,
+    "quantity": 0.00889,
+    "sellPrice": 67511.81808,
+    "expectedNetProfit": 0.005,
+    "id": "a2ed7523-db91-4b8f-b79f-9975ad5e13b9",
+    "createdAt": 1770817951192,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 68423.13,
+    "quantity": 0.00969,
+    "sellPrice": 68970.51504,
+    "expectedNetProfit": 0.005,
+    "id": "7430ccf2-ba46-4e2b-b43c-edd43856bc8e",
+    "createdAt": 1770819102940,
+    "status": "OPEN"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 67768.78,
+    "quantity": 0.00881,
+    "sellPrice": 68310.93024,
+    "expectedNetProfit": 0.005,
+    "id": "764039f3-6d03-4307-bbd5-343235272237",
+    "createdAt": 1770820474991,
+    "status": "OPEN"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 67214.07,
+    "quantity": 0.00799,
+    "sellPrice": 67751.78256,
+    "expectedNetProfit": 0.005,
+    "id": "be2d0cd0-d06d-4f87-89ab-76e1aba2a107",
+    "createdAt": 1770820755409,
+    "status": "OPEN"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 60345.96,
+    "quantity": 0.00801,
+    "sellPrice": 60828.727679999996,
+    "expectedNetProfit": 0.005,
+    "id": "29a27dad-1de8-43c6-9b13-7980d710224d",
+    "createdAt": 1770821240623,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 66507.2,
+    "quantity": 0.00735,
+    "sellPrice": 67039.2576,
+    "expectedNetProfit": 0.005,
+    "id": "e237a8b5-333d-432c-8455-3120f0edac24",
+    "createdAt": 1770821866507,
+    "status": "OPEN"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 65697.02,
+    "quantity": 0.0067,
+    "sellPrice": 66222.59616,
+    "expectedNetProfit": 0.005,
+    "id": "a2b35201-057c-42d1-a889-045a4709c0ca",
+    "createdAt": 1770822427313,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 65956.01,
+    "quantity": 0.00667,
+    "sellPrice": 66483.65808,
+    "expectedNetProfit": 0.005,
+    "id": "c8c22e32-37b6-469f-9530-6ec6fed5af2a",
+    "createdAt": 1770822537716,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 65845.26,
+    "quantity": 0.00669,
+    "sellPrice": 66372.02208,
+    "expectedNetProfit": 0.005,
+    "id": "1a34208f-da5f-46ca-95a7-4105060b42a5",
+    "createdAt": 1770823464207,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 65937.22,
+    "quantity": 0.00668,
+    "sellPrice": 66464.71776,
+    "expectedNetProfit": 0.005,
+    "id": "220b707d-cc42-418b-ada2-975988e7c3f8",
+    "createdAt": 1770823644269,
+    "status": "CLOSED"
   }
 ]

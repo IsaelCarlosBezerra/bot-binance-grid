@@ -2,7 +2,7 @@ import dotenv from "dotenv"
 import { BotConfig } from "./config/bot.config.js"
 import { startCycle } from "./core/cycle-runner.js"
 import { priceBuffer } from "./core/price-buffer.js"
-import { handleSmartRestart } from "./core/restart-handler.js"
+import { handleSmartRestart } from "./core/handleSmartRestart.js"
 import { startPriceWebSocket } from "./binance/websocket.js"
 import { startApi } from "./api/server.js"
 

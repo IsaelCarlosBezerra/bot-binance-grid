@@ -1,6 +1,6 @@
 // src/core/cycle-runner.ts
 import { BotConfig } from "../config/bot.config.js"
-import { runDecisionCycle } from "./decision-engine.js"
+import { runDecisionCycle } from "./runDecisionCycle.js"
 
 let intervalId: NodeJS.Timeout | null = null
 
