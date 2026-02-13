@@ -21,8 +21,8 @@ const waitForPrice = setInterval(async () => {
 
 	await executarLiquidacoesPendentesNoReinicio()
 
-	atualizaPrecoCompra()
 	atualizaPrecoVenda()
+	atualizaPrecoCompra()
 
 	if (BotConfig.enabled) {
 		startCycle()

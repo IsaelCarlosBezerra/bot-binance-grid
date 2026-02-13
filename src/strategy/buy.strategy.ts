@@ -6,21 +6,19 @@ import { binanceClient } from "../binance/client.js"
 import { getAssetBalance } from "../binance/account.service.js"
 import { getSymbolFilters } from "../binance/filters.js"
 import { validateAndAdjustOrder } from "../binance/order.validator.js"
-import { addPosition, getOpenPositions } from "../positions/position.store.js"
-import { criarPrecoCompra, strategyState } from "../core/strategy-state.js"
-import { calculateNextBuyPrice } from "./buy-price.helper.js"
+import { addPosition } from "../positions/position.store.js"
+import { strategyState } from "../core/strategy-state.js"
 import { stopCycle } from "../core/cycle-runner.js"
 import { verificaBuffer } from "../core/utils/verificaBuffer.js"
-import { PrecoCompra } from "../core/utils/PrecoCompra.js"
-import { buscaDadosParaPrecoCompra } from "../core/utils/buscaDadosParaPrecoCompra.js"
 import { atualizaPrecoCompra } from "../core/utils/atualizaPrecoCompra.js"
+import { atualizaPrecoVenda } from "../core/utils/atualizaPrecoVenda.js"
 
 export async function tryBuy(): Promise<boolean> {
 	if (!verificaBuffer()) return false
 
 	const currentPrice = priceBuffer.getPrice()
 
-	if (currentPrice > strategyState.precoCompra!.valor()) {
+	if (!strategyState.precoCompra!.comprar(currentPrice)) {
 		return false
 	}
 
@@ -76,7 +74,7 @@ export async function tryBuy(): Promise<boolean> {
 	// =====================================================
 	// CALCULAR PREÇO DE VENDA
 	// =====================================================
-	const sellPrice = currentPrice * (1 + BotConfig.grossTargetPercentage)
+	const sellPrice = strategyState.precoVenda!.calcularProximoPrecoVenda(currentPrice)
 
 	// =====================================================
 	// REGISTRAR POSIÇÃO
@@ -91,6 +89,7 @@ export async function tryBuy(): Promise<boolean> {
 
 	console.log(`🟢 COMPRA EXECUTADA | qty=${quantity} | price=${currentPrice} | sell=${sellPrice}`)
 
+	atualizaPrecoVenda()
 	atualizaPrecoCompra()
 
 	return true

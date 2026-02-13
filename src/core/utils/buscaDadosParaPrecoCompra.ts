@@ -4,8 +4,8 @@ import { priceBuffer } from "../price-buffer.js"
 
 export function buscaDadosParaPrecoCompra() {
 	const ultimaPosicaoAberta = getUltimaPositionOpen()
-	const precoAtualReal = priceBuffer.getPrice()
+	const precoAtual = priceBuffer.getPrice()
 	const percentualParaAcao = BotConfig.dropPercentage
 
-	return { ultimaPosicaoAberta, precoAtualReal, percentualParaAcao }
+	return { ultimaPosicaoAberta, precoAtual: precoAtual, percentualParaAcao }
 }

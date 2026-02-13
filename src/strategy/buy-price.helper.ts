@@ -1,7 +1,6 @@
 import { BotConfig } from "../config/bot.config.js"
 import { strategyState } from "../core/strategy-state.js"
 import type { Position } from "../positions/position.model.js"
-import { getOpenPositions } from "../positions/position.store.js"
 
 export function calculateNextBuyPrice(currentPrice: number, openPositions: Position[]): number {
 	// 🔹 MODO PADRÃO (ÂNCORA)

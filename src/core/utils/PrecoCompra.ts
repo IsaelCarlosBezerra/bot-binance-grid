@@ -2,16 +2,16 @@ import type { Position } from "../../positions/position.model.js"
 
 export class PrecoCompra {
 	readonly ultimaPosicaoAberta: Position | undefined
-	readonly precoAtualReal: number
+	readonly precoAtual: number
 	readonly percentualParaAcao: number
-	public precoCompraAtual: number
+	public precoEsperado: number
 
-	constructor(
+	/* constructor(
 		ultimaPosicaoAberta: Position | undefined,
-		precoAtualReal: number,
+		precoAtual: number,
 		percentualParaAcao: number,
 	) {
-		if (precoAtualReal <= 0) {
+		if (precoAtual <= 0) {
 			throw new Error("O preço atual deve ser maior que zero.")
 		}
 
@@ -20,9 +20,34 @@ export class PrecoCompra {
 		}
 
 		this.ultimaPosicaoAberta = ultimaPosicaoAberta
-		this.precoAtualReal = precoAtualReal
+		this.precoAtual = precoAtual
 		this.percentualParaAcao = percentualParaAcao
-		this.precoCompraAtual = this.calcular()
+		this.precoEsperado = this.calcular()
+
+		if (this.precoEsperado <= 0) {
+			throw new Error("O preço de compra atual deve ser maior que zero.")
+		}
+	} */
+
+	constructor(
+		ultimaPosicaoAberta: Position | undefined,
+		precoAtual: number,
+		percentualParaAcao: number,
+	) {
+		// Validações de entrada (Fail Fast)
+		if (precoAtual <= 0) throw new Error("O preço atual deve ser maior que zero.")
+
+		// Se o percentual for >= 1 (100%), o preço final seria 0 ou negativo.
+		if (percentualParaAcao <= 0 || percentualParaAcao >= 1) {
+			throw new Error("O percentual deve estar entre 0 e 1 (ex: 0.01 para 1%).")
+		}
+
+		this.ultimaPosicaoAberta = ultimaPosicaoAberta
+		this.precoAtual = precoAtual
+		this.percentualParaAcao = percentualParaAcao
+
+		// O cálculo agora é garantidamente > 0
+		this.precoEsperado = this.calcular()
 	}
 
 	private ultimoPrecoComprado() {
@@ -30,7 +55,7 @@ export class PrecoCompra {
 	}
 
 	private calculaPeloPrecoAtual() {
-		return this.precoAtualReal * (1 - this.percentualParaAcao)
+		return this.precoAtual * (1 - this.percentualParaAcao)
 	}
 
 	private calculaPeloUltimoPrecoComprado() {
@@ -41,35 +66,36 @@ export class PrecoCompra {
 			: ultimoPrecoComprado
 	}
 
-	private diferencaEntreUltimoPrecoEPrecoCalculado() {
-		if (this.verificaSeTemPosicaoAberta()) {
-			const calculadoPeloUltimoPrecoAberto = this.calculaPeloUltimoPrecoComprado()
-			const calculadoPeloPrecoAtual = this.calculaPeloPrecoAtual()
+	/* private calcular() {
+		const precoBaseadoNoAtual = this.calculaPeloPrecoAtual()
+		const precoBaseadoNoAberto = this.calculaPeloUltimoPrecoComprado()
 
-			const diferenca =
-				(calculadoPeloUltimoPrecoAberto - calculadoPeloPrecoAtual) /
-				calculadoPeloUltimoPrecoAberto
-
-			return diferenca
-		} else return 0
-	}
-
-	private verificaSeTemPosicaoAberta(): boolean {
-		return this.ultimaPosicaoAberta && this.ultimaPosicaoAberta.buyPrice > 0 ? true : false
-	}
-
-	private calcular() {
-		const diferenca = this.diferencaEntreUltimoPrecoEPrecoCalculado()
-		if (diferenca > 0) {
-			return diferenca > this.percentualParaAcao
-				? this.calculaPeloPrecoAtual()
-				: this.calculaPeloUltimoPrecoComprado()
+		// Se não tem preço aberto, usa o atual.
+		if (precoBaseadoNoAberto <= 0) {
+			return precoBaseadoNoAtual
 		}
-		return this.calculaPeloPrecoAtual()
-	}
 
+		// Se tem os dois, usa o menor (estratégia conservadora de Grid/DCA)
+		return precoBaseadoNoAtual < precoBaseadoNoAberto
+			? precoBaseadoNoAtual
+			: precoBaseadoNoAberto
+	} */
+
+	private calcular(): number {
+		const precoBaseadoNoAtual = this.precoAtual * (1 - this.percentualParaAcao)
+		const precoBaseadoNoAberto =
+			(this.ultimaPosicaoAberta?.buyPrice ?? 0) * (1 - this.percentualParaAcao)
+
+		// Se houver preço aberto e ele for menor que o cálculo do preço atual,
+		// priorizamos ele (estratégia de DCA/Grid).
+		if (precoBaseadoNoAberto > 0 && precoBaseadoNoAberto < precoBaseadoNoAtual) {
+			return precoBaseadoNoAberto
+		}
+
+		return precoBaseadoNoAtual
+	}
 	valor() {
-		return this.precoCompraAtual
+		return this.precoEsperado
 	}
 
 	comprar(precoAtual: number) {
@@ -78,9 +104,9 @@ export class PrecoCompra {
 
 	static criar(
 		ultimaPosicaoAberta: Position | undefined,
-		precoAtualReal: number,
+		precoAtual: number,
 		percentualParaAcao: number,
 	): PrecoCompra {
-		return new PrecoCompra(ultimaPosicaoAberta, precoAtualReal, percentualParaAcao)
+		return new PrecoCompra(ultimaPosicaoAberta, precoAtual, percentualParaAcao)
 	}
 }

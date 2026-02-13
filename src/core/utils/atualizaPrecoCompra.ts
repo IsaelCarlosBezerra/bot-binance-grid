@@ -3,6 +3,6 @@ import { buscaDadosParaPrecoCompra } from "./buscaDadosParaPrecoCompra.js"
 import { PrecoCompra } from "./PrecoCompra.js"
 
 export function atualizaPrecoCompra() {
-	const { ultimaPosicaoAberta, precoAtualReal, percentualParaAcao } = buscaDadosParaPrecoCompra()
-	criarPrecoCompra(PrecoCompra.criar(ultimaPosicaoAberta, precoAtualReal, percentualParaAcao))
+	const { ultimaPosicaoAberta, precoAtual, percentualParaAcao } = buscaDadosParaPrecoCompra()
+	criarPrecoCompra(PrecoCompra.criar(ultimaPosicaoAberta, precoAtual, percentualParaAcao))
 }
