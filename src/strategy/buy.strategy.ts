@@ -7,44 +7,20 @@ import { getAssetBalance } from "../binance/account.service.js"
 import { getSymbolFilters } from "../binance/filters.js"
 import { validateAndAdjustOrder } from "../binance/order.validator.js"
 import { addPosition, getOpenPositions } from "../positions/position.store.js"
-import { strategyState } from "../core/strategy-state.js"
+import { criarPrecoCompra, strategyState } from "../core/strategy-state.js"
 import { calculateNextBuyPrice } from "./buy-price.helper.js"
 import { stopCycle } from "../core/cycle-runner.js"
+import { verificaBuffer } from "../core/utils/verificaBuffer.js"
+import { PrecoCompra } from "../core/utils/PrecoCompra.js"
+import { buscaDadosParaPrecoCompra } from "../core/utils/buscaDadosParaPrecoCompra.js"
+import { atualizaPrecoCompra } from "../core/utils/atualizaPrecoCompra.js"
 
 export async function tryBuy(): Promise<boolean> {
-	// =====================================================
-	// PREÇO AINDA NÃO DISPONÍVEL
-	// =====================================================
-	if (!priceBuffer.isReady()) return false
+	if (!verificaBuffer()) return false
 
 	const currentPrice = priceBuffer.getPrice()
-	const openPositions = getOpenPositions()
 
-	const buyPrice = calculateNextBuyPrice(currentPrice, openPositions)
-
-	// =====================================================
-	// GARANTIR QUE A UI SEMPRE TENHA UM VALOR
-	// =====================================================
-	if (strategyState.nextBuyPrice === null) {
-		strategyState.nextBuyPrice = buyPrice
-	}
-
-	// =====================================================
-	// CONGELAMENTO DE COMPRA (APENAS NO MODO ÂNCORA)
-	// =====================================================
-	if (BotConfig.buyReferenceMode === "ANCHOR" && openPositions.length > 0) {
-		return false
-	}
-
-	// =====================================================
-	// ATUALIZA PREÇO DE COMPRA QUANDO PERMITIDO
-	// =====================================================
-	strategyState.nextBuyPrice = buyPrice
-
-	// =====================================================
-	// CONDIÇÃO DE COMPRA
-	// =====================================================
-	if (currentPrice > buyPrice) {
+	if (currentPrice > strategyState.precoCompra!.valor()) {
 		return false
 	}
 
@@ -115,12 +91,7 @@ export async function tryBuy(): Promise<boolean> {
 
 	console.log(`🟢 COMPRA EXECUTADA | qty=${quantity} | price=${currentPrice} | sell=${sellPrice}`)
 
-	// =====================================================
-	// ATUALIZA ÂNCORA APÓS COMPRA (MODO ÂNCORA)
-	// =====================================================
-	if (BotConfig.buyReferenceMode === "ANCHOR") {
-		strategyState.anchorPrice = currentPrice
-	}
+	atualizaPrecoCompra()
 
 	return true
 }

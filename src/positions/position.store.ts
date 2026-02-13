@@ -57,3 +57,9 @@ export function closePosition(id: string) {
 export function getOpenPositions(): Position[] {
 	return loadPositions().filter((p) => p.status === "OPEN")
 }
+
+export function getUltimaPositionOpen() {
+	const positions = getOpenPositions()
+	const ordenadas = positions.sort((a, b) => a.createdAt - b.createdAt)
+	return ordenadas.at(-1)
+}
