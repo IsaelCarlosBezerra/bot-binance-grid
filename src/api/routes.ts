@@ -1,21 +1,32 @@
 import type { Express } from "express"
 import { BotConfig } from "../config/bot.config.js"
 import { startCycle, stopCycle } from "../core/cycle-runner.js"
-import { getOpenPositions } from "../positions/position.store.js"
+import { getAllPositions } from "../positions/position.store.js"
 import { strategyState } from "../core/strategy-state.js"
-import { loadPositions } from "../positions/position.store.js"
 import { generateTradeSummary } from "../reports/trade-report.js"
 
 export function registerRoutes(app: Express) {
 	app.get("/status", (_req, res) => {
-		const positions = loadPositions()
+		const positions = getAllPositions()
 		const summary = generateTradeSummary(positions)
+
+		// Extraímos os valores das instâncias das classes
+		const precoAtual = strategyState.precoCompra?.precoAtual
+
+		// Pegamos o alvo de compra e venda chamando os métodos das classes
+		const alvoCompra = strategyState.precoCompra ? strategyState.precoCompra.valor() : null
+		const alvoVenda = strategyState.precoVenda ? strategyState.precoVenda.valor() : null
 
 		res.json({
 			enabled: BotConfig.enabled,
 			config: BotConfig,
 			openPositions: positions.filter((p) => p.status === "OPEN"),
-			strategy: strategyState, // 🔴 NÃO REMOVER
+			strategy: {
+				currentPrice: precoAtual,
+				nextBuyPrice: alvoCompra,
+				nextSellPrice: alvoVenda,
+				isProcessing: strategyState.isProcessing,
+			},
 			summary,
 		})
 	})

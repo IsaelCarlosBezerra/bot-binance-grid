@@ -1,49 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1770998797960" clover="3.2.0">
-  <project timestamp="1770998797960" name="All files">
-    <metrics statements="37" coveredstatements="37" conditionals="28" coveredconditionals="26" methods="16" coveredmethods="16" elements="81" coveredelements="79" complexity="0" loc="37" ncloc="37" packages="1" files="2" classes="2"/>
-    <file name="PrecoCompra.ts" path="D:\Development\Projetos-reais\bot-binance\src\core\utils\PrecoCompra.ts">
-      <metrics statements="19" coveredstatements="19" conditionals="16" coveredconditionals="14" methods="8" coveredmethods="8"/>
-      <line num="38" count="9" type="cond" truecount="2" falsecount="0"/>
-      <line num="41" count="8" type="cond" truecount="4" falsecount="0"/>
-      <line num="42" count="2" type="stmt"/>
-      <line num="45" count="6" type="stmt"/>
-      <line num="46" count="6" type="stmt"/>
-      <line num="47" count="6" type="stmt"/>
-      <line num="50" count="6" type="stmt"/>
-      <line num="54" count="2" type="cond" truecount="1" falsecount="1"/>
-      <line num="58" count="1" type="stmt"/>
-      <line num="62" count="1" type="stmt"/>
-      <line num="64" count="1" type="cond" truecount="1" falsecount="1"/>
-      <line num="85" count="6" type="stmt"/>
-      <line num="87" count="6" type="cond" truecount="2" falsecount="0"/>
-      <line num="91" count="6" type="cond" truecount="4" falsecount="0"/>
-      <line num="92" count="1" type="stmt"/>
-      <line num="95" count="5" type="stmt"/>
-      <line num="98" count="5" type="stmt"/>
-      <line num="102" count="2" type="stmt"/>
-      <line num="110" count="1" type="stmt"/>
-    </file>
-    <file name="PrecoVenda.ts" path="D:\Development\Projetos-reais\bot-binance\src\core\utils\PrecoVenda.ts">
-      <metrics statements="18" coveredstatements="18" conditionals="12" coveredconditionals="12" methods="8" coveredmethods="8"/>
-      <line num="14" count="10" type="cond" truecount="2" falsecount="0"/>
-      <line num="15" count="1" type="stmt"/>
-      <line num="18" count="9" type="cond" truecount="2" falsecount="0"/>
-      <line num="19" count="1" type="stmt"/>
-      <line num="22" count="8" type="stmt"/>
-      <line num="23" count="8" type="stmt"/>
-      <line num="24" count="8" type="stmt"/>
-      <line num="25" count="8" type="stmt"/>
-      <line num="29" count="8" type="cond" truecount="2" falsecount="0"/>
-      <line num="33" count="1" type="stmt"/>
-      <line num="37" count="8" type="stmt"/>
-      <line num="38" count="8" type="cond" truecount="2" falsecount="0"/>
-      <line num="39" count="4" type="stmt"/>
-      <line num="40" count="4" type="cond" truecount="2" falsecount="0"/>
-      <line num="44" count="12" type="stmt"/>
-      <line num="48" count="4" type="cond" truecount="2" falsecount="0"/>
-      <line num="52" count="1" type="stmt"/>
-      <line num="60" count="1" type="stmt"/>
-    </file>
+<coverage generated="1771010003422" clover="3.2.0">
+  <project timestamp="1771010003423" name="All files">
+    <metrics statements="75" coveredstatements="68" conditionals="42" coveredconditionals="36" methods="22" coveredmethods="22" elements="139" coveredelements="126" complexity="0" loc="75" ncloc="75" packages="3" files="6" classes="6"/>
+    <package name="binance">
+      <metrics statements="9" coveredstatements="7" conditionals="4" coveredconditionals="2" methods="2" coveredmethods="2"/>
+      <file name="order.validator.ts" path="D:\Development\Projetos-reais\bot-binance\src\binance\order.validator.ts">
+        <metrics statements="7" coveredstatements="5" conditionals="4" coveredconditionals="2" methods="1" coveredmethods="1"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="19" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="20" count="0" type="stmt"/>
+        <line num="23" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="24" count="0" type="stmt"/>
+        <line num="27" count="1" type="stmt"/>
+      </file>
+      <file name="quantity.utils.ts" path="D:\Development\Projetos-reais\bot-binance\src\binance\quantity.utils.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="core.utils">
+      <metrics statements="37" coveredstatements="37" conditionals="28" coveredconditionals="26" methods="16" coveredmethods="16"/>
+      <file name="PrecoCompra.ts" path="D:\Development\Projetos-reais\bot-binance\src\core\utils\PrecoCompra.ts">
+        <metrics statements="19" coveredstatements="19" conditionals="16" coveredconditionals="14" methods="8" coveredmethods="8"/>
+        <line num="38" count="9" type="cond" truecount="2" falsecount="0"/>
+        <line num="41" count="8" type="cond" truecount="4" falsecount="0"/>
+        <line num="42" count="2" type="stmt"/>
+        <line num="45" count="6" type="stmt"/>
+        <line num="46" count="6" type="stmt"/>
+        <line num="47" count="6" type="stmt"/>
+        <line num="50" count="6" type="stmt"/>
+        <line num="54" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="58" count="1" type="stmt"/>
+        <line num="62" count="1" type="stmt"/>
+        <line num="64" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="85" count="6" type="stmt"/>
+        <line num="87" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="91" count="6" type="cond" truecount="4" falsecount="0"/>
+        <line num="92" count="1" type="stmt"/>
+        <line num="95" count="5" type="stmt"/>
+        <line num="98" count="5" type="stmt"/>
+        <line num="102" count="2" type="stmt"/>
+        <line num="110" count="1" type="stmt"/>
+      </file>
+      <file name="PrecoVenda.ts" path="D:\Development\Projetos-reais\bot-binance\src\core\utils\PrecoVenda.ts">
+        <metrics statements="18" coveredstatements="18" conditionals="12" coveredconditionals="12" methods="8" coveredmethods="8"/>
+        <line num="14" count="10" type="cond" truecount="2" falsecount="0"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="18" count="9" type="cond" truecount="2" falsecount="0"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="22" count="8" type="stmt"/>
+        <line num="23" count="8" type="stmt"/>
+        <line num="24" count="8" type="stmt"/>
+        <line num="25" count="8" type="stmt"/>
+        <line num="29" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="33" count="1" type="stmt"/>
+        <line num="37" count="8" type="stmt"/>
+        <line num="38" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="39" count="4" type="stmt"/>
+        <line num="40" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="44" count="12" type="stmt"/>
+        <line num="48" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="52" count="1" type="stmt"/>
+        <line num="60" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="strategy">
+      <metrics statements="29" coveredstatements="24" conditionals="10" coveredconditionals="8" methods="4" coveredmethods="4"/>
+      <file name="BuyStrategy.ts" path="D:\Development\Projetos-reais\bot-binance\src\strategy\BuyStrategy.ts">
+        <metrics statements="22" coveredstatements="17" conditionals="8" coveredconditionals="6" methods="2" coveredmethods="2"/>
+        <line num="10" count="3" type="stmt"/>
+        <line num="11" count="3" type="stmt"/>
+        <line num="12" count="3" type="stmt"/>
+        <line num="13" count="3" type="stmt"/>
+        <line num="14" count="3" type="stmt"/>
+        <line num="19" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="20" count="0" type="stmt"/>
+        <line num="24" count="3" type="stmt"/>
+        <line num="25" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="26" count="1" type="stmt"/>
+        <line num="27" count="1" type="stmt"/>
+        <line num="31" count="2" type="stmt"/>
+        <line num="32" count="2" type="stmt"/>
+        <line num="35" count="2" type="stmt"/>
+        <line num="36" count="1" type="stmt"/>
+        <line num="42" count="1" type="cond" truecount="3" falsecount="1"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="44" count="1" type="stmt"/>
+        <line num="48" count="0" type="stmt"/>
+        <line num="51" count="0" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+      </file>
+      <file name="SellStrategy.ts" path="D:\Development\Projetos-reais\bot-binance\src\strategy\SellStrategy.ts">
+        <metrics statements="7" coveredstatements="7" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
+        <line num="7" count="2" type="stmt"/>
+        <line num="8" count="2" type="stmt"/>
+        <line num="12" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+      </file>
+    </package>
   </project>
 </coverage>

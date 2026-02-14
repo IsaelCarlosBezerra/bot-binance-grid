@@ -228,8 +228,6 @@
 					<div class="section">
 						<strong>Mercado</strong>
 						<div>Preço atual: <span id="currentPrice"></span></div>
-						<div>Preço âncora: <span id="anchorPrice"></span></div>
-						<div>Variação vs âncora: <span id="anchorVariation"></span></div>
 					</div>
 
 					<div class="section">
@@ -339,22 +337,6 @@
 				document.getElementById("currentPrice").innerText = m.currentPrice
 					? `${m.currentPrice.toFixed(2)} USDT`
 					: "-"
-
-				// Âncora
-				document.getElementById("anchorPrice").innerText = m.anchorPrice
-					? `${m.anchorPrice.toFixed(2)} USDT`
-					: "-"
-
-				// Variação percentual vs âncora
-				if (m.currentPrice && m.anchorPrice) {
-					const variation = ((m.currentPrice - m.anchorPrice) / m.anchorPrice) * 100
-
-					const el = document.getElementById("anchorVariation")
-					el.innerText = `${variation.toFixed(2)} %`
-					el.className = variation >= 0 ? "positive" : "negative"
-				} else {
-					document.getElementById("anchorVariation").innerText = "-"
-				}
 
 				// Próxima compra
 				document.getElementById("nextBuy").innerText = m.nextBuyPrice

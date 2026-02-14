@@ -8,6 +8,7 @@ export interface StrategyState {
 	anchorPrice: number | null
 	precoCompra: PrecoCompra | null
 	precoVenda: PrecoVenda | null
+	isProcessing: boolean
 }
 
 export const strategyState: StrategyState = {
@@ -17,6 +18,7 @@ export const strategyState: StrategyState = {
 	anchorPrice: null,
 	precoCompra: null,
 	precoVenda: null,
+	isProcessing: false,
 }
 
 export function criarPrecoCompra(precoCompra: PrecoCompra) {

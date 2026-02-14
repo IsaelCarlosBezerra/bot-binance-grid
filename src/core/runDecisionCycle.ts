@@ -1,14 +1,29 @@
-// src/core/decision-engine.ts
+// src/core/runDecisionCycle.ts
+import { strategyState } from "./strategy-state.js"
 import { trySell } from "../strategy/sell.strategy.js"
 import { tryBuy } from "../strategy/buy.strategy.js"
 
 export async function runDecisionCycle(): Promise<void> {
-	// 1️⃣ Tentativa de venda (prioridade absoluta)
-	const sold = await trySell()
-	if (sold) {
-		return // vendeu → encerra ciclo
+	// 1️⃣ Verifica se já existe um processo em andamento
+	if (strategyState.isProcessing) {
+		console.log("⏳ Ciclo pulado: Ordem ainda em processamento...")
+		return
 	}
 
-	// 2️⃣ Tentativa de compra
-	await tryBuy()
+	try {
+		// 2️⃣ Ativa a trava
+		strategyState.isProcessing = true
+
+		// Tentativa de venda
+		const sold = await trySell()
+		if (sold) return
+
+		// Tentativa de compra
+		await tryBuy()
+	} catch (error) {
+		console.error("❌ Erro crítico no ciclo de decisão:", error)
+	} finally {
+		// 3️⃣ Libera a trava SEMPRE ao final, permitindo o próximo ciclo de 5s
+		strategyState.isProcessing = false
+	}
 }

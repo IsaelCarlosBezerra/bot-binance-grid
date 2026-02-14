@@ -2,27 +2,41 @@
 import { BotConfig } from "../config/bot.config.js"
 import { runDecisionCycle } from "./runDecisionCycle.js"
 
-let intervalId: NodeJS.Timeout | null = null
+let isRunning = false
+let timeoutId: NodeJS.Timeout | null = null
 
-export function startCycle() {
-	if (intervalId) return
+export async function startCycle() {
+	if (isRunning) return
 
+	isRunning = true
 	console.log("▶️ Ciclo do bot iniciado")
 
-	intervalId = setInterval(async () => {
+	async function executeLoop() {
+		if (!isRunning) return
+
 		try {
+			// Executa a lógica de decisão e espera ela terminar
 			await runDecisionCycle()
 		} catch (error) {
-			console.error("Erro no ciclo:", error)
+			console.error("❌ Erro no ciclo:", error)
 		}
-	}, BotConfig.cycleIntervalMs)
+
+		// Agenda a PRÓXIMA execução para daqui a X milissegundos
+		// O relógio só começa a contar DEPOIS que runDecisionCycle terminou
+		if (isRunning) {
+			timeoutId = setTimeout(executeLoop, BotConfig.cycleIntervalMs)
+		}
+	}
+
+	// Inicia o primeiro disparo
+	executeLoop()
 }
 
 export function stopCycle() {
-	if (!intervalId) return
-
-	clearInterval(intervalId)
-	intervalId = null
-
-	console.log("⏸️ Ciclo do bot pausado")
+	isRunning = false
+	if (timeoutId) {
+		clearTimeout(timeoutId)
+		timeoutId = null
+	}
+	console.log("停 Ciclo do bot pausado")
 }

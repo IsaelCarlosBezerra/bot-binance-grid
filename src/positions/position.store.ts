@@ -7,31 +7,36 @@ import { randomUUID } from "crypto"
 const DATA_DIR = path.resolve(process.cwd(), "data")
 const FILE_PATH = path.join(DATA_DIR, "positions.json")
 
+// 🟢 O CACHE: A variável que o bot consultará em tempo real
+let positionsCache: Position[] = []
+
 function ensureDataDir() {
 	if (!fs.existsSync(DATA_DIR)) {
 		fs.mkdirSync(DATA_DIR)
 	}
 }
 
-export function loadPositions(): Position[] {
+// 🔵 Carrega do disco para o Cache (roda apenas uma vez no início)
+function loadFromDisk() {
 	ensureDataDir()
-
 	if (!fs.existsSync(FILE_PATH)) {
-		return []
+		positionsCache = []
+		return
 	}
-
 	const raw = fs.readFileSync(FILE_PATH, "utf-8")
-	return JSON.parse(raw) as Position[]
+	positionsCache = JSON.parse(raw) as Position[]
 }
 
-export function savePositions(positions: Position[]) {
+// 🔵 Salva o Cache no disco (Persistência)
+function persist() {
 	ensureDataDir()
-	fs.writeFileSync(FILE_PATH, JSON.stringify(positions, null, 2))
+	fs.writeFileSync(FILE_PATH, JSON.stringify(positionsCache, null, 2))
 }
+
+// Inicializa o cache imediatamente ao carregar o módulo
+loadFromDisk()
 
 export function addPosition(position: Omit<Position, "id" | "createdAt" | "status">) {
-	const positions = loadPositions()
-
 	const newPosition: Position = {
 		...position,
 		id: randomUUID(),
@@ -39,26 +44,35 @@ export function addPosition(position: Omit<Position, "id" | "createdAt" | "statu
 		status: "OPEN",
 	}
 
-	positions.push(newPosition)
-	savePositions(positions)
+	// Atualiza a RAM e depois o Disco
+	positionsCache.push(newPosition)
+	persist()
 
 	return newPosition
 }
 
 export function closePosition(id: string) {
-	const positions = loadPositions()
 	const status: PositionStatus = "CLOSED"
 
-	const updated = positions.map((p) => (p.id === id ? { ...p, status } : p))
+	// Atualiza na RAM instantaneamente
+	positionsCache = positionsCache.map((p) => (p.id === id ? { ...p, status } : p))
 
-	savePositions(updated)
+	// Salva no disco
+	persist()
 }
 
 export function getOpenPositions(): Position[] {
-	return loadPositions().filter((p) => p.status === "OPEN")
+	// Busca na RAM (muito rápido)
+	return positionsCache.filter((p) => p.status === "OPEN")
+}
+
+export function getAllPositions(): Position[] {
+	// Busca na RAM (muito rápido)
+	return positionsCache
 }
 
 export function getUltimaPositionOpen() {
+	// Trabalha apenas com os dados da RAM
 	const positions = getOpenPositions()
 	const ordenadas = positions.sort((a, b) => a.createdAt - b.createdAt)
 	return ordenadas.at(-1)

@@ -1,5 +1,4 @@
 // src/strategy/buy.strategy.ts
-
 import { BotConfig } from "../config/bot.config.js"
 import { priceBuffer } from "../core/price-buffer.js"
 import { binanceClient } from "../binance/client.js"
@@ -18,79 +17,79 @@ export async function tryBuy(): Promise<boolean> {
 
 	const currentPrice = priceBuffer.getPrice()
 
-	if (!strategyState.precoCompra!.comprar(currentPrice)) {
-		return false
-	}
+	if (strategyState.precoCompra!.comprar(currentPrice)) {
+		// =====================================================
+		// SALDO DISPONÍVEL (USDT)
+		// =====================================================
+		const balance = await getAssetBalance("USDT")
+		if (!balance) {
+			stopCycle()
+			return false
+		}
 
-	// =====================================================
-	// SALDO DISPONÍVEL (USDT)
-	// =====================================================
-	const balance = await getAssetBalance("USDT")
-	if (!balance) {
-		stopCycle()
-		return false
-	}
+		const freeBalance = Number(balance.free)
+		if (freeBalance <= 0) {
+			stopCycle()
+			return false
+		}
 
-	const freeBalance = Number(balance.free)
-	if (freeBalance <= 0) {
-		stopCycle()
-		return false
-	}
+		// =====================================================
+		// VALOR DA COMPRA (% DO SALDO)
+		// =====================================================
+		const buyValue = freeBalance * BotConfig.buyPercentageOfBalance
 
-	// =====================================================
-	// VALOR DA COMPRA (% DO SALDO)
-	// =====================================================
-	const buyValue = freeBalance * BotConfig.buyPercentageOfBalance
+		// =====================================================
+		// CONVERTER PARA QUANTIDADE
+		// =====================================================
+		const rawQuantity = buyValue / currentPrice
 
-	// =====================================================
-	// CONVERTER PARA QUANTIDADE
-	// =====================================================
-	const rawQuantity = buyValue / currentPrice
+		// =====================================================
+		// VALIDAR LIMITES BINANCE
+		// =====================================================
+		const filters = await getSymbolFilters(BotConfig.symbol)
 
-	// =====================================================
-	// VALIDAR LIMITES BINANCE
-	// =====================================================
-	const filters = await getSymbolFilters(BotConfig.symbol)
+		const validation = validateAndAdjustOrder({
+			quantity: rawQuantity,
+			price: currentPrice,
+			filters,
+		})
 
-	const validation = validateAndAdjustOrder({
-		quantity: rawQuantity,
-		price: currentPrice,
-		filters,
-	})
+		if (!validation.valid || !validation.quantity) {
+			console.log("❌ Compra inválida:", validation.reason)
+			stopCycle()
+			return false
+		}
 
-	if (!validation.valid || !validation.quantity) {
-		console.log("❌ Compra inválida:", validation.reason)
-		stopCycle()
-		return false
-	}
+		const quantity = validation.quantity
 
-	const quantity = validation.quantity
+		// =====================================================
+		// EXECUTAR COMPRA (MARKET)
+		// =====================================================
+		await binanceClient.marketBuy(BotConfig.symbol, quantity)
 
-	// =====================================================
-	// EXECUTAR COMPRA (MARKET)
-	// =====================================================
-	await binanceClient.marketBuy(BotConfig.symbol, quantity)
+		// =====================================================
+		// CALCULAR PREÇO DE VENDA
+		// =====================================================
+		const sellPrice = strategyState.precoVenda!.calcularProximoPrecoVenda(currentPrice)
 
-	// =====================================================
-	// CALCULAR PREÇO DE VENDA
-	// =====================================================
-	const sellPrice = strategyState.precoVenda!.calcularProximoPrecoVenda(currentPrice)
+		// =====================================================
+		// REGISTRAR POSIÇÃO
+		// =====================================================
+		addPosition({
+			symbol: BotConfig.symbol,
+			buyPrice: currentPrice,
+			quantity,
+			sellPrice,
+			expectedNetProfit: BotConfig.targetNetProfit,
+		})
 
-	// =====================================================
-	// REGISTRAR POSIÇÃO
-	// =====================================================
-	addPosition({
-		symbol: BotConfig.symbol,
-		buyPrice: currentPrice,
-		quantity,
-		sellPrice,
-		expectedNetProfit: BotConfig.targetNetProfit,
-	})
+		console.log(
+			`🟢 COMPRA EXECUTADA | qty=${quantity} | price=${currentPrice} | sell=${sellPrice}`,
+		)
 
-	console.log(`🟢 COMPRA EXECUTADA | qty=${quantity} | price=${currentPrice} | sell=${sellPrice}`)
+		atualizaPrecoVenda()
+		atualizaPrecoCompra()
 
-	atualizaPrecoVenda()
-	atualizaPrecoCompra()
-
-	return true
+		return true
+	} else return false
 }
