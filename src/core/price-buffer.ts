@@ -1,6 +1,5 @@
 import { strategyState } from "./strategy-state.js"
 import { getOpenPositions } from "../positions/position.store.js"
-import { BotConfig } from "../config/bot.config.js"
 
 // src/core/price-buffer.ts
 class PriceBuffer {
@@ -14,20 +13,6 @@ class PriceBuffer {
 		strategyState.currentPrice = price
 
 		const openPositions = getOpenPositions()
-
-		// 🔴 Atualização inteligente da âncora
-		if (openPositions.length === 0) {
-			if (strategyState.anchorPrice === null) {
-				strategyState.anchorPrice = price
-				return
-			}
-
-			const thresholdPrice = strategyState.anchorPrice * (1 + BotConfig.targetNetProfit)
-
-			if (price >= thresholdPrice) {
-				strategyState.anchorPrice = price
-			}
-		}
 	}
 
 	getPrice(): number {

@@ -1,26 +1,36 @@
 import type { Express } from "express"
 import { BotConfig } from "../config/bot.config.js"
 import { startCycle, stopCycle } from "../core/cycle-runner.js"
-import { getAllPositions } from "../positions/position.store.js"
+import { getAllPositions, getOpenPositions } from "../positions/position.store.js"
 import { strategyState } from "../core/strategy-state.js"
 import { generateTradeSummary } from "../reports/trade-report.js"
+import { priceBuffer } from "../core/price-buffer.js"
 
 export function registerRoutes(app: Express) {
+	app.get("/price", (_req, res) => {
+		const newPrice = priceBuffer.getPrice()
+
+		res.json({
+			price: newPrice,
+		})
+	})
+
 	app.get("/status", (_req, res) => {
 		const positions = getAllPositions()
 		const summary = generateTradeSummary(positions)
+		const openPositions = getOpenPositions()
 
 		// Extraímos os valores das instâncias das classes
-		const precoAtual = strategyState.precoCompra?.precoAtual
+		const precoAtual = strategyState.currentPrice
 
 		// Pegamos o alvo de compra e venda chamando os métodos das classes
-		const alvoCompra = strategyState.precoCompra ? strategyState.precoCompra.valor() : null
-		const alvoVenda = strategyState.precoVenda ? strategyState.precoVenda.valor() : null
+		const alvoCompra = strategyState.nextBuyPrice
+		const alvoVenda = strategyState.nextSellPrice
 
 		res.json({
 			enabled: BotConfig.enabled,
 			config: BotConfig,
-			openPositions: positions.filter((p) => p.status === "OPEN"),
+			openPositions: openPositions,
 			strategy: {
 				currentPrice: precoAtual,
 				nextBuyPrice: alvoCompra,

@@ -61,9 +61,18 @@ export function closePosition(id: string) {
 	persist()
 }
 
+export function atualizaPriceVendaPosition(id: string, newPrice: number) {
+	// Atualiza na RAM instantaneamente
+	positionsCache = positionsCache.map((p) => (p.id === id ? { ...p, sellPrice: newPrice } : p))
+
+	// Salva no disco
+	persist()
+}
+
 export function getOpenPositions(): Position[] {
 	// Busca na RAM (muito rápido)
-	return positionsCache.filter((p) => p.status === "OPEN")
+	const openPositions = positionsCache.filter((p) => p.status === "OPEN")
+	return openPositions.sort((a, b) => a.createdAt - b.createdAt)
 }
 
 export function getAllPositions(): Position[] {

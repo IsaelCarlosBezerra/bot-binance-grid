@@ -1,30 +1,17 @@
-import { PrecoCompra } from "./utils/PrecoCompra.js"
-import type { PrecoVenda } from "./utils/PrecoVenda.js"
+import type { Position } from "../positions/position.model.js"
 
 export interface StrategyState {
-	currentPrice: number | null
-	nextBuyPrice: number | null
-	nextSellPrice: number | null
-	anchorPrice: number | null
-	precoCompra: PrecoCompra | null
-	precoVenda: PrecoVenda | null
+	currentPrice: number
+	nextBuyPrice: number
+	nextSellPrice: number
 	isProcessing: boolean
+	ultimaPosicaoAberta: Position | undefined
 }
 
 export const strategyState: StrategyState = {
-	currentPrice: null,
-	nextBuyPrice: null,
-	nextSellPrice: null,
-	anchorPrice: null,
-	precoCompra: null,
-	precoVenda: null,
+	currentPrice: 0,
+	nextBuyPrice: 0,
+	nextSellPrice: 0,
 	isProcessing: false,
-}
-
-export function criarPrecoCompra(precoCompra: PrecoCompra) {
-	strategyState.precoCompra = precoCompra
-}
-
-export function criarPrecoVenda(precoVenda: PrecoVenda) {
-	strategyState.precoVenda = precoVenda
+	ultimaPosicaoAberta: undefined,
 }

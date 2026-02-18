@@ -10,6 +10,7 @@ import { startBot, stopBot, saveConfig, loadStatus } from "./services/api"
 
 function App() {
 	const [data, setData] = useState(null)
+	const [price, setPrice] = useState(0)
 
 	const fetchStatus = async () => {
 		const status = await loadStatus()
@@ -19,6 +20,14 @@ function App() {
 	}
 
 	useEffect(() => {
+		const socket = new WebSocket("ws://localhost:3001")
+
+		socket.onopen = console.log("WebSocket Conectado!")
+
+		socket.onmessage = (event) => {
+			setPrice(() => event.data)
+		}
+
 		fetchStatus()
 		const interval = setInterval(fetchStatus, 3000)
 		return () => clearInterval(interval)

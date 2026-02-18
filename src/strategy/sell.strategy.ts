@@ -4,8 +4,7 @@ import { closePosition } from "../positions/position.store.js"
 import { binanceClient } from "../binance/client.js"
 import { strategyState } from "../core/strategy-state.js"
 import { verificaBuffer } from "../core/utils/verificaBuffer.js"
-import { atualizaPrecoCompra } from "../core/utils/atualizaPrecoCompra.js"
-import { atualizaPrecoVenda } from "../core/utils/atualizaPrecoVenda.js"
+import { atualizarState } from "../core/utils/atualizarState.js"
 
 export async function trySell(): Promise<boolean> {
 	if (!verificaBuffer()) return false
@@ -13,8 +12,8 @@ export async function trySell(): Promise<boolean> {
 	const currentPrice = priceBuffer.getPrice()
 
 	// Processa em ordem de criação (FIFO)
-	if (strategyState.precoVenda?.vender(currentPrice)) {
-		const position = strategyState.precoVenda!.ultimaPosicao()
+	if (strategyState.ultimaPosicaoAberta && strategyState.nextSellPrice <= currentPrice) {
+		const position = strategyState.ultimaPosicaoAberta
 		// Executa venda por quantidade
 		await binanceClient.marketSell(position.symbol, position.quantity)
 
@@ -22,8 +21,8 @@ export async function trySell(): Promise<boolean> {
 
 		console.log(`✅ VENDA EXECUTADA | qty=${position.quantity} | price=${currentPrice}`)
 
-		atualizaPrecoVenda()
-		atualizaPrecoCompra()
+		atualizarState()
+
 		return true
 	}
 

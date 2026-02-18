@@ -1,0 +1,23 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+  // Dica de Arquiteto: O Prisma 6 gerencia engines de forma mais leve
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TradeOrder {
+  id                String   @id @default(uuid())
+  symbol            String   @db.VarChar(20)
+  buyPrice          Decimal  @db.Decimal(18, 8)
+  quantity          Decimal  @db.Decimal(18, 8)
+  sellPrice         Decimal? @db.Decimal(18, 8)
+  expectedNetProfit Decimal  @db.Decimal(18, 8)
+  status            String   @default("OPEN") @db.VarChar(20)
+  createdAt         BigInt
+
+  @@map("trade_orders")
+}

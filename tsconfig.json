@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"types": ["jest", "node"],
-		"rootDir": "./src",
+		"rootDir": "./",
 		"outDir": "./dist",
 		"lib": ["ES2023"],
 		"module": "nodenext",
@@ -18,5 +18,6 @@
 		"noUncheckedSideEffectImports": true,
 		"moduleDetection": "force",
 		"skipLibCheck": true
-	}
+	},
+	"include": ["src/**/*"]
 }

@@ -5,19 +5,19 @@ import { binanceClient } from "../binance/client.js"
 import { getAssetBalance } from "../binance/account.service.js"
 import { getSymbolFilters } from "../binance/filters.js"
 import { validateAndAdjustOrder } from "../binance/order.validator.js"
-import { addPosition } from "../positions/position.store.js"
+import { addPosition, closePosition } from "../positions/position.store.js"
 import { strategyState } from "../core/strategy-state.js"
 import { stopCycle } from "../core/cycle-runner.js"
 import { verificaBuffer } from "../core/utils/verificaBuffer.js"
-import { atualizaPrecoCompra } from "../core/utils/atualizaPrecoCompra.js"
-import { atualizaPrecoVenda } from "../core/utils/atualizaPrecoVenda.js"
+import { calcularPrecoVenda } from "../core/utils/calcularPrecoVenda.js"
+import { atualizarState } from "../core/utils/atualizarState.js"
 
 export async function tryBuy(): Promise<boolean> {
 	if (!verificaBuffer()) return false
 
 	const currentPrice = priceBuffer.getPrice()
 
-	if (strategyState.precoCompra!.comprar(currentPrice)) {
+	if (strategyState.nextBuyPrice > currentPrice) {
 		// =====================================================
 		// SALDO DISPONÍVEL (USDT)
 		// =====================================================
@@ -70,7 +70,7 @@ export async function tryBuy(): Promise<boolean> {
 		// =====================================================
 		// CALCULAR PREÇO DE VENDA
 		// =====================================================
-		const sellPrice = strategyState.precoVenda!.calcularProximoPrecoVenda(currentPrice)
+		const sellPrice = calcularPrecoVenda(currentPrice)
 
 		// =====================================================
 		// REGISTRAR POSIÇÃO
@@ -83,13 +83,11 @@ export async function tryBuy(): Promise<boolean> {
 			expectedNetProfit: BotConfig.targetNetProfit,
 		})
 
+		atualizarState()
+
 		console.log(
 			`🟢 COMPRA EXECUTADA | qty=${quantity} | price=${currentPrice} | sell=${sellPrice}`,
 		)
-
-		atualizaPrecoVenda()
-		atualizaPrecoCompra()
-
 		return true
 	} else return false
 }

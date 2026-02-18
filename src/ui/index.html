@@ -310,6 +310,17 @@
 				loadStatus()
 			}
 
+			async function loadPrice() {
+				const res = await fetch("/price")
+				const data = await res.json()
+				const price = data.price
+
+				// Preço atual
+				document.getElementById("currentPrice").innerText = price
+					? `${price.toFixed(2)} USDT`
+					: "-"
+			}
+
 			async function loadStatus() {
 				const res = await fetch("/status")
 				const data = await res.json()
@@ -333,10 +344,6 @@
 
 				// preencher formulário
 				//document.getElementById("market").innerText = JSON.stringify(data.strategy, null, 2)
-				// Preço atual
-				document.getElementById("currentPrice").innerText = m.currentPrice
-					? `${m.currentPrice.toFixed(2)} USDT`
-					: "-"
 
 				// Próxima compra
 				document.getElementById("nextBuy").innerText = m.nextBuyPrice
@@ -412,6 +419,7 @@
 				}
 			}
 
+			loadPrice()
 			loadStatus()
 			setInterval(loadStatus, 3000)
 		</script>

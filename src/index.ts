@@ -5,8 +5,7 @@ import { executarLiquidacoesPendentesNoReinicio } from "./core/executarLiquidaco
 import { startPriceWebSocket } from "./binance/websocket.js"
 import { startApi } from "./api/server.js"
 import { verificaBuffer } from "./core/utils/verificaBuffer.js"
-import { atualizaPrecoCompra } from "./core/utils/atualizaPrecoCompra.js"
-import { atualizaPrecoVenda } from "./core/utils/atualizaPrecoVenda.js"
+import { atualizarState } from "./core/utils/atualizarState.js"
 
 dotenv.config()
 
@@ -21,8 +20,7 @@ const waitForPrice = setInterval(async () => {
 
 	await executarLiquidacoesPendentesNoReinicio()
 
-	atualizaPrecoVenda()
-	atualizaPrecoCompra()
+	atualizarState()
 
 	if (BotConfig.enabled) {
 		startCycle()
