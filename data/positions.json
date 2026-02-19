@@ -1308,5 +1308,25 @@
     "id": "3c651ef1-a566-4f2d-8385-19b26e1a79bb",
     "createdAt": 1771268272306,
     "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 65846.28,
+    "quantity": 0.00676,
+    "sellPrice": 66377.29838709677,
+    "expectedNetProfit": 0.005,
+    "id": "2614cf34-de6f-4d84-af40-2d32e17a465e",
+    "createdAt": 1771506804326,
+    "status": "CLOSED"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 59956.89,
+    "quantity": 0.00743,
+    "sellPrice": 60440.41330645161,
+    "expectedNetProfit": 0.005,
+    "id": "971c71db-646b-4632-8cca-33cefdd2ff45",
+    "createdAt": 1771508363662,
+    "status": "CLOSED"
   }
 ]

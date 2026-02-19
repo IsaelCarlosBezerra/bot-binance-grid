@@ -3,8 +3,9 @@ import { BotConfig } from "../config/bot.config.js"
 import { startCycle, stopCycle } from "../core/cycle-runner.js"
 import { getAllPositions, getOpenPositions } from "../positions/position.store.js"
 import { strategyState } from "../core/strategy-state.js"
-import { generateTradeSummary } from "../reports/trade-report.js"
+import { generateTradeSummary, generateTradeSummaryOpen } from "../reports/trade-report.js"
 import { priceBuffer } from "../core/price-buffer.js"
+import { getAssetBalance } from "../binance/account.service.js"
 
 export function registerRoutes(app: Express) {
 	app.get("/price", (_req, res) => {
@@ -16,8 +17,7 @@ export function registerRoutes(app: Express) {
 	})
 
 	app.get("/status", (_req, res) => {
-		const positions = getAllPositions()
-		const summary = generateTradeSummary(positions)
+		const summary = generateTradeSummary()
 		const openPositions = getOpenPositions()
 
 		// Extraímos os valores das instâncias das classes
@@ -38,6 +38,37 @@ export function registerRoutes(app: Express) {
 				isProcessing: strategyState.isProcessing,
 			},
 			summary,
+		})
+	})
+
+	app.get("/sumaryprevisto", (_req, res) => {
+		const summary = generateTradeSummaryOpen()
+
+		res.json({
+			summary,
+		})
+	})
+
+	app.get("/alocado", (_req, res) => {
+		const openPositions = getOpenPositions()
+
+		const valorAlocado = openPositions.reduce(
+			(acc, item) => acc + item.quantity * item.buyPrice,
+			0,
+		)
+
+		const qtdAlocada = openPositions.reduce((acc, item) => acc + item.quantity, 0)
+
+		res.json({
+			valorAlocado,
+			qtdAlocada,
+		})
+	})
+
+	app.get("/balance", (_req, res) => {
+		const balance = strategyState.balance
+		res.json({
+			balance,
 		})
 	})
 

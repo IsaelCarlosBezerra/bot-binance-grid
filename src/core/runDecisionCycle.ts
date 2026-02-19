@@ -2,6 +2,7 @@
 import { strategyState } from "./strategy-state.js"
 import { trySell } from "../strategy/sell.strategy.js"
 import { tryBuy } from "../strategy/buy.strategy.js"
+import { calibrarPrecoCompra } from "./utils/calibrarPrecoDeCompra.js"
 
 export async function runDecisionCycle(): Promise<void> {
 	// 1️⃣ Verifica se já existe um processo em andamento
@@ -13,6 +14,9 @@ export async function runDecisionCycle(): Promise<void> {
 	try {
 		// 2️⃣ Ativa a trava
 		strategyState.isProcessing = true
+
+		//verificarSePrecoCompraEstaCalibrado
+		calibrarPrecoCompra()
 
 		// Tentativa de venda
 		const sold = await trySell()

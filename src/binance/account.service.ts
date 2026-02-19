@@ -14,5 +14,7 @@ export async function getAccountBalances(): Promise<Balance[]> {
 
 export async function getAssetBalance(asset: string) {
 	const balances = await getAccountBalances()
-	return balances.find((b) => b.asset === asset)
+	const balance = balances.find((b) => b.asset === asset)
+	const freeBalance = !balance ? 0 : Number(balance?.free)
+	return freeBalance
 }

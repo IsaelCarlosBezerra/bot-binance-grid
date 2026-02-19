@@ -75,6 +75,12 @@ export function getOpenPositions(): Position[] {
 	return openPositions.sort((a, b) => a.createdAt - b.createdAt)
 }
 
+export function getClosedPositions(): Position[] {
+	// Busca na RAM (muito rápido)
+	const openPositions = positionsCache.filter((p) => p.status === "CLOSED")
+	return openPositions.sort((a, b) => a.createdAt - b.createdAt)
+}
+
 export function getAllPositions(): Position[] {
 	// Busca na RAM (muito rápido)
 	return positionsCache

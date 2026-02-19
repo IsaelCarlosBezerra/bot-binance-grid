@@ -6,6 +6,7 @@ export interface StrategyState {
 	nextSellPrice: number
 	isProcessing: boolean
 	ultimaPosicaoAberta: Position | undefined
+	balance: number
 }
 
 export const strategyState: StrategyState = {
@@ -14,4 +15,5 @@ export const strategyState: StrategyState = {
 	nextSellPrice: 0,
 	isProcessing: false,
 	ultimaPosicaoAberta: undefined,
+	balance: 0,
 }

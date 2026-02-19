@@ -5,7 +5,7 @@ export function calcularNovoPrecoCompra(
 	ultimaOrdemAberta: Position | undefined,
 	precoAtual: number,
 ) {
-	const peloPrecoAtual = precoAtual * (1 - BotConfig.grossTargetPercentage)
+	const peloPrecoAtual = precoAtual * (1 - BotConfig.dropPercentage)
 
 	const pelaUltimaCompra = ultimaOrdemAberta
 		? ultimaOrdemAberta?.buyPrice * (1 - BotConfig.dropPercentage)

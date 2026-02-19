@@ -21,13 +21,7 @@ export async function tryBuy(): Promise<boolean> {
 		// =====================================================
 		// SALDO DISPONÍVEL (USDT)
 		// =====================================================
-		const balance = await getAssetBalance("USDT")
-		if (!balance) {
-			stopCycle()
-			return false
-		}
-
-		const freeBalance = Number(balance.free)
+		const freeBalance = await getAssetBalance("USDT")
 		if (freeBalance <= 0) {
 			stopCycle()
 			return false
@@ -83,7 +77,9 @@ export async function tryBuy(): Promise<boolean> {
 			expectedNetProfit: BotConfig.targetNetProfit,
 		})
 
-		atualizarState()
+		//Atualiza balance no state
+		const newBalance = freeBalance - currentPrice * quantity
+		atualizarState(newBalance)
 
 		console.log(
 			`🟢 COMPRA EXECUTADA | qty=${quantity} | price=${currentPrice} | sell=${sellPrice}`,

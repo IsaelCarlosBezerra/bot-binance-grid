@@ -21,7 +21,9 @@ export async function trySell(): Promise<boolean> {
 
 		console.log(`✅ VENDA EXECUTADA | qty=${position.quantity} | price=${currentPrice}`)
 
-		atualizarState()
+		//Atualiza balance no state
+		const newBalance = strategyState.balance + currentPrice * position.quantity
+		atualizarState(newBalance)
 
 		return true
 	}

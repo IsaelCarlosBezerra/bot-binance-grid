@@ -6,6 +6,7 @@ import { startPriceWebSocket } from "./binance/websocket.js"
 import { startApi } from "./api/server.js"
 import { verificaBuffer } from "./core/utils/verificaBuffer.js"
 import { atualizarState } from "./core/utils/atualizarState.js"
+import { getAssetBalance } from "./binance/account.service.js"
 
 dotenv.config()
 
@@ -20,7 +21,8 @@ const waitForPrice = setInterval(async () => {
 
 	await executarLiquidacoesPendentesNoReinicio()
 
-	atualizarState()
+	const freeBalance = await getAssetBalance("USDT")
+	atualizarState(freeBalance)
 
 	if (BotConfig.enabled) {
 		startCycle()
