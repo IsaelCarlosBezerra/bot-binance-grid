@@ -1,11 +1,11 @@
 import type { Express } from "express"
 import { BotConfig } from "../config/bot.config.js"
 import { startCycle, stopCycle } from "../core/cycle-runner.js"
-import { getAllPositions, getOpenPositions } from "../positions/position.store.js"
+import { getOpenPositions } from "../positions/position.store.js"
 import { strategyState } from "../core/strategy-state.js"
 import { generateTradeSummary, generateTradeSummaryOpen } from "../reports/trade-report.js"
 import { priceBuffer } from "../core/price-buffer.js"
-import { getAssetBalance } from "../binance/account.service.js"
+import { buy } from "../binance/buy.js"
 
 export function registerRoutes(app: Express) {
 	app.get("/price", (_req, res) => {
@@ -87,5 +87,12 @@ export function registerRoutes(app: Express) {
 	app.post("/config", (req, res) => {
 		Object.assign(BotConfig, req.body)
 		res.json({ ok: true, config: BotConfig })
+	})
+
+	app.post("/buy", (req, res) => {
+		const { symbol, qtd } = req.body
+		//const response = { symbol, qtd }
+		const response = buy(symbol, qtd)
+		return res.json({ response })
 	})
 }
