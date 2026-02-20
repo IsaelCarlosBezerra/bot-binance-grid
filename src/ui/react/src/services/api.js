@@ -85,3 +85,17 @@ export const loadSumaryPrevisto = async () => {
 		return null
 	}
 }
+
+export const buy = async ({ symbol, qtd }) => {
+	try {
+		const response = await fetch(`${API_URL}/buy`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ symbol, qtd }),
+		})
+		return response.ok
+	} catch (error) {
+		console.error("Error saving config:", error)
+		return false
+	}
+}
