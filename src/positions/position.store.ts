@@ -72,7 +72,7 @@ export function atualizaPriceVendaPosition(id: string, newPrice: number) {
 export function getOpenPositions(): Position[] {
 	// Busca na RAM (muito rápido)
 	const openPositions = positionsCache.filter((p) => p.status === "OPEN")
-	return openPositions.sort((a, b) => a.createdAt - b.createdAt)
+	return openPositions.sort((a, b) => b.buyPrice - a.buyPrice)
 }
 
 export function getClosedPositions(): Position[] {
@@ -89,6 +89,6 @@ export function getAllPositions(): Position[] {
 export function getUltimaPositionOpen() {
 	// Trabalha apenas com os dados da RAM
 	const positions = getOpenPositions()
-	const ordenadas = positions.sort((a, b) => a.createdAt - b.createdAt)
-	return ordenadas.at(-1)
+	//const ordenadas = positions.sort((a, b) => a.createdAt - b.createdAt)
+	return positions.at(-1)
 }
