@@ -24,7 +24,6 @@ function App() {
 		qtdAlocada: 0,
 	})
 	const [summaryPrevisto, setSummaryPrevisto] = useState(null)
-	const [price, setPrice] = useState(0)
 
 	const fetchStatus = async () => {
 		const status = await loadStatus()
@@ -49,7 +48,6 @@ function App() {
 
 	const fechtResultadosPrevistos = async () => {
 		const summaryPrevisto = await loadSumaryPrevisto()
-		console.log(summaryPrevisto)
 
 		if (summaryPrevisto) {
 			setSummaryPrevisto(summaryPrevisto.summary)
@@ -57,14 +55,6 @@ function App() {
 	}
 
 	useEffect(() => {
-		/* const socket = new WebSocket("ws://localhost:3001")
-
-		socket.onopen = console.log("WebSocket Conectado!")
-
-		socket.onmessage = (event) => {
-			setPrice(() => event.data)
-		}*/
-
 		fetchStatus()
 		fechtBalance()
 		fechtTotalAlocado()
@@ -104,7 +94,11 @@ function App() {
 			<Header />
 			<div className="container">
 				<StatusIndicator enabled={data?.enabled || false} />
-				<Controls onStart={handleStart} onStop={handleStop} />
+				<Controls
+					onStart={handleStart}
+					onStop={handleStop}
+					price={data?.strategy.currentPrice}
+				/>
 
 				<div className="cards">
 					<FinancialSummary
