@@ -1,0 +1,1 @@
+{"version":3,"file":"price-buffer.d.ts","sourceRoot":"","sources":["price-buffer.ts"],"names":[],"mappings":"AAIA,cAAM,WAAW;IAChB,OAAO,CAAC,KAAK,CAAsB;IACnC,OAAO,CAAC,UAAU,CAAsB;IAExC,MAAM,CAAC,KAAK,EAAE,MAAM;IASpB,QAAQ,IAAI,MAAM,GAAG,IAAI;IAIzB,aAAa,IAAI,MAAM,GAAG,IAAI;IAI9B,OAAO,IAAI,OAAO;CAGlB;AAED,eAAO,MAAM,WAAW,aAAoB,CAAA"}
