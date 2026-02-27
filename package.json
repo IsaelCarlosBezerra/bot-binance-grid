@@ -7,7 +7,6 @@
 		"dev": "tsx watch src/main.ts",
 		"build": "tsc",
 		"start": "node dist/main.js",
-		"postbuild": "node dist/main.js",
 		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
 	},
 	"keywords": [],
