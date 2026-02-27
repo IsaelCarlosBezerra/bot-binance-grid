@@ -1,7 +1,7 @@
 // src/binance/websocket.ts
-import { binanceClient } from "./client.js"
-import { priceBuffer } from "../core/price-buffer.js"
 import { BotConfig } from "../config/bot.config.js"
+import { priceBuffer } from "../core/price-buffer.js"
+import { binanceClient } from "./client.js"
 
 export function startPriceWebSocket() {
 	const symbol = BotConfig.symbol
@@ -16,8 +16,7 @@ export function startPriceWebSocket() {
 			}
 		} catch (error) {
 			const msg = `Erro no monitoramento do miniTicker ${symbol}`
-			console.log(msg)
-			throw new Error(msg)
+			console.error(msg, error)
 		}
 	})
 

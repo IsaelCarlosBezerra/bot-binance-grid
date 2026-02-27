@@ -1,5 +1,5 @@
-import { strategyState } from "./strategy-state.js"
 import { getOpenPositions } from "../positions/position.store.js"
+import { strategyState } from "./strategy-state.js"
 
 // src/core/price-buffer.ts
 class PriceBuffer {
@@ -15,10 +15,7 @@ class PriceBuffer {
 		const openPositions = getOpenPositions()
 	}
 
-	getPrice(): number {
-		if (this.price === null) {
-			throw new Error("Preço ainda não disponível no buffer")
-		}
+	getPrice(): number | null {
 		return this.price
 	}
 

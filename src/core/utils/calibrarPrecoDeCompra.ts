@@ -4,6 +4,7 @@ import { strategyState } from "../strategy-state.js"
 
 export function calibrarPrecoCompra() {
 	const precoAtual = priceBuffer.getPrice()
+	if (!precoAtual) return
 	const precoCompraAtual = strategyState.nextBuyPrice
 	const diferenca = ((precoAtual - precoCompraAtual) / precoAtual) * 100
 

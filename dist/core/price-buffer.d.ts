@@ -2,7 +2,7 @@ declare class PriceBuffer {
     private price;
     private lastUpdate;
     update(price: number): void;
-    getPrice(): number;
+    getPrice(): number | null;
     getLastUpdate(): number | null;
     isReady(): boolean;
 }

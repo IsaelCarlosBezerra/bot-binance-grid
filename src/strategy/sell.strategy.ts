@@ -1,15 +1,16 @@
 // src/strategy/sell.strategy.ts
-import { priceBuffer } from "../core/price-buffer.js"
-import { closePosition } from "../positions/position.store.js"
 import { binanceClient } from "../binance/client.js"
+import { priceBuffer } from "../core/price-buffer.js"
 import { strategyState } from "../core/strategy-state.js"
-import { verificaBuffer } from "../core/utils/verificaBuffer.js"
 import { atualizarState } from "../core/utils/atualizarState.js"
+import { verificaBuffer } from "../core/utils/verificaBuffer.js"
+import { closePosition } from "../positions/position.store.js"
 
 export async function trySell(): Promise<boolean> {
 	if (!verificaBuffer()) return false
 
 	const currentPrice = priceBuffer.getPrice()
+	if (!currentPrice) return false
 
 	// Processa em ordem de criação (FIFO)
 	if (strategyState.ultimaPosicaoAberta && strategyState.nextSellPrice <= currentPrice) {

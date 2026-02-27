@@ -1,5 +1,6 @@
+import type { Position } from "../../positions/position.model.js";
 export declare function buscarDadosParaState(): {
-    ultimaPosicaoAberta: import("../../positions/position.model.js").Position | undefined;
-    precoAtual: number;
-};
+    positionOpen: Position;
+    currentyPrice: number;
+} | undefined;
 //# sourceMappingURL=buscarDadosParaState.d.ts.map

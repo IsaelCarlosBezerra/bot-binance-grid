@@ -1,15 +1,16 @@
 // src/core/restart-handler.ts
-import { priceBuffer } from "./price-buffer.js";
-import { getOpenPositions, closePosition } from "../positions/position.store.js";
 import { binanceClient } from "../binance/client.js";
 import { BotConfig } from "../config/bot.config.js";
-import { verificarSeTemPosicoesAbertas } from "./utils/verificarSeTemPosicoesAbertas.js";
+import { priceBuffer } from "./price-buffer.js";
 import { fecharPosicoesLiquidadas } from "./utils/fecharPosicoesLiquidadas.js";
 import { verificaBuffer } from "./utils/verificaBuffer.js";
+import { verificarSeTemPosicoesAbertas } from "./utils/verificarSeTemPosicoesAbertas.js";
 export async function executarLiquidacoesPendentesNoReinicio() {
     if (!verificaBuffer())
         return;
     const currentPrice = priceBuffer.getPrice();
+    if (!currentPrice)
+        return;
     const { result, posicoesAbertas } = verificarSeTemPosicoesAbertas();
     if (!result) {
         console.log("ℹ️ Nenhuma posição aberta no reinício");

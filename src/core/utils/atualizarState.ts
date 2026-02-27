@@ -4,13 +4,16 @@ import { calcularNovoPrecoCompra } from "./calcularNovoPrecoCompra.js"
 import { calcularNovoPrecoVenda } from "./calcularNovoPrecoVenda.js"
 
 export function atualizarState(balance: number) {
-	const { precoAtual, ultimaPosicaoAberta } = buscarDadosParaState()
-	const { newPrecoCompra } = calcularNovoPrecoCompra(ultimaPosicaoAberta, precoAtual)
-	const { newPrecoVenda } = calcularNovoPrecoVenda(ultimaPosicaoAberta)
+	const retorno = buscarDadosParaState()
+	if (retorno) {
+		const { currentyPrice, positionOpen } = retorno
+		const { newPrecoCompra } = calcularNovoPrecoCompra(positionOpen, currentyPrice)
+		const { newPrecoVenda } = calcularNovoPrecoVenda(positionOpen)
 
-	strategyState.currentPrice = precoAtual
-	strategyState.nextBuyPrice = newPrecoCompra
-	strategyState.nextSellPrice = newPrecoVenda
-	strategyState.ultimaPosicaoAberta = ultimaPosicaoAberta
-	strategyState.balance = balance
+		strategyState.currentPrice = currentyPrice
+		strategyState.nextBuyPrice = newPrecoCompra
+		strategyState.nextSellPrice = newPrecoVenda
+		strategyState.ultimaPosicaoAberta = positionOpen
+		strategyState.balance = balance
+	}
 }

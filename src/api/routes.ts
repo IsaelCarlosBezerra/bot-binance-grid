@@ -14,7 +14,7 @@ export function registerRoutes(app: Express) {
 
 	app.get("/price", (_req, res) => {
 		const newPrice = priceBuffer.getPrice()
-
+		if (!newPrice) return
 		res.json({
 			price: newPrice,
 		})

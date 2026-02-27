@@ -10,6 +10,8 @@ import { validateAndAdjustOrder } from "./order.validator.js";
 export async function buy(symbol, qtd) {
     //Pega valor atual do ativo
     const currentPrice = priceBuffer.getPrice();
+    if (!currentPrice)
+        return;
     const filters = await getSymbolFilters(symbol);
     const validation = validateAndAdjustOrder({
         quantity: qtd,
