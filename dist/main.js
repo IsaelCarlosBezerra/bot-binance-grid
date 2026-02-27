@@ -8,7 +8,7 @@ import { executarLiquidacoesPendentesNoReinicio } from "./core/executarLiquidaco
 import { atualizarState } from "./core/utils/atualizarState.js";
 import { verificaBuffer } from "./core/utils/verificaBuffer.js";
 dotenv.config();
-const PORT = Number(process.env.PORT);
+const PORT = Number(process.env.PORT ?? 3000);
 // Inicia WebSocket
 startPriceWebSocket();
 // Aguarda primeiro preço para reinício inteligente
