@@ -25,4 +25,4 @@ const waitForPrice = setInterval(async () => {
     console.log("🤖 Bot totalmente operacional");
 }, 2000);
 startApi(PORT || 3000);
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=main.js.map
