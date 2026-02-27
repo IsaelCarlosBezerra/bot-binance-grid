@@ -1,0 +1,1 @@
+{"version":3,"file":"fecharPosicoesLiquidadas.js","sourceRoot":"","sources":["../../../src/core/utils/fecharPosicoesLiquidadas.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,mCAAmC,CAAA;AAEjE,MAAM,UAAU,wBAAwB,CAAC,gBAA0B;IAClE,KAAK,MAAM,EAAE,IAAI,gBAAgB,EAAE,CAAC;QACnC,aAAa,CAAC,EAAE,CAAC,CAAA;IAClB,CAAC;AACF,CAAC"}

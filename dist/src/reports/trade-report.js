@@ -1,0 +1,84 @@
+import { getClosedPositions, getOpenPositions } from "../positions/position.store.js";
+const BINANCE_FEE_RATE = 0.001; // 0,1%
+const IR_RATE = 0.15; // 15%
+export function generateTradeSummary() {
+    const closed = getClosedPositions();
+    let comprasQtd = 0;
+    let comprasValor = 0;
+    let vendasQtd = 0;
+    let vendasValor = 0;
+    let totalTaxas = 0;
+    let totalIR = 0;
+    for (const p of closed) {
+        const buyValue = p.buyPrice * p.quantity;
+        const sellValue = p.sellPrice * p.quantity;
+        // Compras
+        comprasQtd += 1;
+        comprasValor += buyValue;
+        // Vendas
+        vendasQtd += 1;
+        vendasValor += sellValue;
+        // Taxas Binance (compra + venda)
+        totalTaxas += buyValue * BINANCE_FEE_RATE;
+        totalTaxas += sellValue * BINANCE_FEE_RATE;
+        // Lucro bruto da operação
+        const lucroBruto = sellValue - buyValue;
+        // IR sobre lucro
+        totalIR += lucroBruto > 0 ? lucroBruto * IR_RATE : 0;
+    }
+    const lucroLiquido = vendasValor - comprasValor - totalTaxas - totalIR;
+    return {
+        compras: {
+            quantidade: comprasQtd,
+            valorTotal: comprasValor,
+        },
+        vendas: {
+            quantidade: vendasQtd,
+            valorTotal: vendasValor,
+        },
+        lucroLiquido,
+        totalTaxas,
+        totalIR,
+    };
+}
+export function generateTradeSummaryOpen() {
+    const open = getOpenPositions();
+    let comprasQtd = 0;
+    let comprasValor = 0;
+    let vendasQtd = 0;
+    let vendasValor = 0;
+    let totalTaxas = 0;
+    let totalIR = 0;
+    for (const p of open) {
+        const buyValue = p.buyPrice * p.quantity;
+        const sellValue = p.sellPrice * p.quantity;
+        // Compras
+        comprasQtd += 1;
+        comprasValor += buyValue;
+        // Vendas
+        vendasQtd += 1;
+        vendasValor += sellValue;
+        // Taxas Binance (compra + venda)
+        totalTaxas += buyValue * BINANCE_FEE_RATE;
+        totalTaxas += sellValue * BINANCE_FEE_RATE;
+        // Lucro bruto da operação
+        const lucroBruto = sellValue - buyValue;
+        // IR sobre lucro
+        totalIR += lucroBruto > 0 ? lucroBruto * IR_RATE : 0;
+    }
+    const lucroLiquido = vendasValor - comprasValor - totalTaxas - totalIR;
+    return {
+        comprasAbertas: {
+            quantidade: comprasQtd,
+            valorTotal: comprasValor,
+        },
+        vendasAbertas: {
+            quantidade: vendasQtd,
+            valorTotal: vendasValor,
+        },
+        lucroLiquidoAberto: lucroLiquido,
+        totalTaxasAberto: totalTaxas,
+        totalIRAberto: totalIR,
+    };
+}
+//# sourceMappingURL=trade-report.js.map

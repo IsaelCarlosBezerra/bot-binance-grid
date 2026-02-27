@@ -1,0 +1,1 @@
+{"version":3,"file":"price.service.js","sourceRoot":"","sources":["../../../src/binance/price.service.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,aAAa,CAAA;AAE3C,MAAM,CAAC,KAAK,UAAU,eAAe,CAAC,MAAc;IACnD,MAAM,aAAa,CAAC,aAAa,EAAE,CAAA;IACnC,MAAM,MAAM,GAAG,MAAM,aAAa,CAAC,MAAM,CAAC,MAAM,CAAC,CAAA;IACjD,OAAO,MAAM,CAAC,MAAM,CAAC,MAAM,CAAC,CAAC,CAAA;AAC9B,CAAC"}
