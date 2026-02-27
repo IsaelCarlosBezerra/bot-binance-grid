@@ -1,1 +1,0 @@
-{"version":3,"file":"account.service.d.ts","sourceRoot":"","sources":["../../../src/binance/account.service.ts"],"names":[],"mappings":"AAEA,UAAU,OAAO;IAChB,KAAK,EAAE,MAAM,CAAA;IACb,IAAI,EAAE,MAAM,CAAA;IACZ,MAAM,EAAE,MAAM,CAAA;CACd;AAED,wBAAsB,kBAAkB,IAAI,OAAO,CAAC,OAAO,EAAE,CAAC,CAI7D;AAED,wBAAsB,eAAe,CAAC,KAAK,EAAE,MAAM,mBAKlD"}
