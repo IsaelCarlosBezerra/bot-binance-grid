@@ -1,11 +1,14 @@
+import { buy } from "../binance/buy.js";
 import { BotConfig } from "../config/bot.config.js";
 import { startCycle, stopCycle } from "../core/cycle-runner.js";
-import { getOpenPositions } from "../positions/position.store.js";
-import { strategyState } from "../core/strategy-state.js";
-import { generateTradeSummary, generateTradeSummaryOpen } from "../reports/trade-report.js";
 import { priceBuffer } from "../core/price-buffer.js";
-import { buy } from "../binance/buy.js";
+import { strategyState } from "../core/strategy-state.js";
+import { getOpenPositions } from "../positions/position.store.js";
+import { generateTradeSummary, generateTradeSummaryOpen } from "../reports/trade-report.js";
 export function registerRoutes(app) {
+    app.get("/", (req, res) => {
+        res.send("API ONLINE");
+    });
     app.get("/price", (_req, res) => {
         const newPrice = priceBuffer.getPrice();
         res.json({

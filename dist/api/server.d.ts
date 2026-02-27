@@ -1,2 +1,2 @@
-export declare function startApi(port: number | string | undefined): void;
+export declare function startApi(port: number): void;
 //# sourceMappingURL=server.d.ts.map

@@ -10,6 +10,6 @@ export function startApi(port) {
     //const uiPath = path.resolve(process.cwd(), "src/ui")
     //app.use(express.static(uiPath))
     registerRoutes(app);
-    app.listen(port, () => console.log(`🌐 API rodando em PORT:${port}`));
+    app.listen(port, "0.0.0.0", () => console.log(`🌐 API rodando em PORT:${port}`));
 }
 //# sourceMappingURL=server.js.map

@@ -3,7 +3,7 @@ import { startApi } from "./api/server.js"
 
 dotenv.config()
 
-const PORT = process.env.PORT
+const PORT = Number(process.env.PORT)
 
 // Inicia WebSocket
 //startPriceWebSocket()

@@ -3,7 +3,7 @@ import express from "express"
 //import path from "path"
 import { registerRoutes } from "./routes.js"
 
-export function startApi(port: number | string | undefined) {
+export function startApi(port: number) {
 	const app = express()
 	app.use(cors())
 	app.use(express.json())
@@ -14,5 +14,5 @@ export function startApi(port: number | string | undefined) {
 
 	registerRoutes(app)
 
-	app.listen(port, () => console.log(`🌐 API rodando em PORT:${port}`))
+	app.listen(port, "0.0.0.0", () => console.log(`🌐 API rodando em PORT:${port}`))
 }
