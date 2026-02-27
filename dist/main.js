@@ -24,5 +24,8 @@ const waitForPrice = setInterval(async () => {
     }
     console.log("🤖 Bot totalmente operacional");
 }, 2000);
-startApi(PORT || 3000);
+if (!PORT) {
+    throw new Error("PORT não definida pelo ambiente");
+}
+startApi(PORT);
 //# sourceMappingURL=main.js.map
