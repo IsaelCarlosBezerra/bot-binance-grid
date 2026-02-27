@@ -1,14 +1,16 @@
 import dotenv from "dotenv"
+import { startApi } from "./api/server.js"
+import { getAssetBalance } from "./binance/account.service.js"
+import { startPriceWebSocket } from "./binance/websocket.js"
 import { BotConfig } from "./config/bot.config.js"
 import { startCycle } from "./core/cycle-runner.js"
 import { executarLiquidacoesPendentesNoReinicio } from "./core/executarLiquidacoesPendentesNoReinicio.js"
-import { startPriceWebSocket } from "./binance/websocket.js"
-import { startApi } from "./api/server.js"
-import { verificaBuffer } from "./core/utils/verificaBuffer.js"
 import { atualizarState } from "./core/utils/atualizarState.js"
-import { getAssetBalance } from "./binance/account.service.js"
+import { verificaBuffer } from "./core/utils/verificaBuffer.js"
 
 dotenv.config()
+
+const PORT = process.env.PORT
 
 // Inicia WebSocket
 startPriceWebSocket()
@@ -29,6 +31,6 @@ const waitForPrice = setInterval(async () => {
 	}
 
 	console.log("🤖 Bot totalmente operacional")
-}, 1000)
+}, 2000)
 
-startApi(3001)
+startApi(PORT || 3000)
