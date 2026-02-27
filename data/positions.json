@@ -2088,5 +2088,15 @@
     "id": "25267f7c-dc1c-4e2c-ad3b-e18688d971fd",
     "createdAt": 1772140126315,
     "status": "OPEN"
+  },
+  {
+    "symbol": "BTCUSDT",
+    "buyPrice": 66979.99,
+    "quantity": 0.0099,
+    "sellPrice": 67520.15120967742,
+    "expectedNetProfit": 0.005,
+    "id": "fdcd3bb1-b214-4172-ba3a-c0610d27b320",
+    "createdAt": 1772154472955,
+    "status": "OPEN"
   }
 ]
