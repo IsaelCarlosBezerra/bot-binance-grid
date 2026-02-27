@@ -10,7 +10,7 @@ import { verificaBuffer } from "./core/utils/verificaBuffer.js"
 
 dotenv.config()
 
-const PORT = Number(process.env.PORT ?? 3000)
+const PORT = Number(process.env.PORT)
 
 // Inicia WebSocket
 startPriceWebSocket()
