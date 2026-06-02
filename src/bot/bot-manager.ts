@@ -57,7 +57,14 @@ class BotManager {
 	}
 
 	async startBot(userId: string): Promise<void> {
-		const runtime = await this.loadAndStart(userId)
+		let runtime: BotRuntime
+		try {
+			runtime = await this.loadAndStart(userId)
+		} catch (err) {
+			// Garante que instâncias inválidas não ficam presas no Map
+			this.instances.delete(userId)
+			throw err
+		}
 		await prisma.botInstance.update({ where: { userId }, data: { enabled: true } })
 		runtime.start()
 	}
@@ -132,14 +139,18 @@ class BotManager {
 		this.symbolClients.set(symbolKey, client)
 
 		const connect = () => {
-			client.websockets.miniTicker((ticker: Record<string, { close: string }>) => {
-				if (ticker[symbol]) {
-					const price = Number(ticker[symbol].close)
-					if (!Number.isNaN(price)) {
-						runtime.updatePrice(price)
+			try {
+				client.websockets.miniTicker((ticker: Record<string, { close: string }>) => {
+					if (ticker[symbol]) {
+						const price = Number(ticker[symbol]!.close)
+						if (!Number.isNaN(price)) {
+							runtime.updatePrice(price)
+						}
 					}
-				}
-			})
+				})
+			} catch (err) {
+				console.error(`⚠️ [${runtime.userId}] Erro ao conectar WebSocket:`, err)
+			}
 		}
 
 		connect()

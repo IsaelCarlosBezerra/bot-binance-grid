@@ -12,15 +12,7 @@ export function startApi(port = 3001) {
 		? process.env["CORS_ORIGIN"].split(",").map((o) => o.trim().replace(/\/$/, ""))
 		: ["http://localhost:3005", "http://localhost:3000"]
 
-	app.use(
-		cors({
-			origin: (origin, callback) => {
-				if (!origin || allowedOrigins.includes(origin)) callback(null, true)
-				else callback(new Error(`CORS: origin '${origin}' not allowed`))
-			},
-			credentials: true,
-		}),
-	)
+	app.use(cors({ origin: allowedOrigins, credentials: true }))
 	app.use(express.json())
 
 	const uiPath = path.resolve(process.cwd(), "src/ui")
