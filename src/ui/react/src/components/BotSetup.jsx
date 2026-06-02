@@ -30,13 +30,14 @@ export default function BotSetup({ onSetup }) {
 				<h2 className="login-title" style={{ fontSize: "1.4rem" }}>Configurar Bot</h2>
 				<p className="login-subtitle">Insira suas credenciais da Binance para começar</p>
 
-				<form onSubmit={handleSubmit} className="login-form">
+				<form onSubmit={handleSubmit} className="login-form" autoComplete="off">
 					<input
 						className="login-input"
 						type="text"
 						placeholder="Binance API Key"
 						value={form.binanceApiKey}
 						onChange={(e) => setForm({ ...form, binanceApiKey: e.target.value })}
+						autoComplete="off"
 						required
 					/>
 					<input
@@ -45,6 +46,7 @@ export default function BotSetup({ onSetup }) {
 						placeholder="Binance API Secret"
 						value={form.binanceApiSecret}
 						onChange={(e) => setForm({ ...form, binanceApiSecret: e.target.value })}
+						autoComplete="new-password"
 						required
 					/>
 					<input

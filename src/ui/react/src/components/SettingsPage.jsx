@@ -193,7 +193,7 @@ export default function SettingsPage({ config, user, onSaved, onClose }) {
 				)}
 
 				{tab === "keys" && (
-					<form onSubmit={handleSaveKeys} className="settings-form">
+					<form onSubmit={handleSaveKeys} className="settings-form" autoComplete="off">
 						<p className="settings-hint">
 							Suas chaves são criptografadas antes de serem salvas. Preencha apenas se quiser substituir as atuais.
 						</p>
