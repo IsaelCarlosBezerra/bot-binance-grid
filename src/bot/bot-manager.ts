@@ -131,14 +131,29 @@ class BotManager {
 		const client = runtime.client
 		this.symbolClients.set(symbolKey, client)
 
-		client.websockets.miniTicker((ticker: Record<string, { close: string }>) => {
-			if (ticker[symbol]) {
-				const price = Number(ticker[symbol].close)
-				if (!Number.isNaN(price)) {
-					runtime.updatePrice(price)
+		const connect = () => {
+			client.websockets.miniTicker((ticker: Record<string, { close: string }>) => {
+				if (ticker[symbol]) {
+					const price = Number(ticker[symbol].close)
+					if (!Number.isNaN(price)) {
+						runtime.updatePrice(price)
+					}
 				}
+			})
+		}
+
+		connect()
+
+		// Verifica se o preço parou de atualizar e reconecta
+		setInterval(() => {
+			const lastUpdate = runtime.getLastPriceUpdate()
+			if (lastUpdate && Date.now() - lastUpdate > 30_000) {
+				console.log(`🔄 [${runtime.userId}] WebSocket sem atualização — reconectando...`)
+				this.symbolClients.delete(symbolKey)
+				connect()
+				this.symbolClients.set(symbolKey, client)
 			}
-		})
+		}, 30_000)
 
 		console.log(`📡 [${runtime.userId}] WebSocket ${symbol} iniciado`)
 	}

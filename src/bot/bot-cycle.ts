@@ -127,6 +127,8 @@ async function tryBuy(bot: BotRuntime): Promise<boolean> {
 // ─── Ciclo principal ──────────────────────────────────────────────────────
 
 export async function runDecisionCycleForInstance(bot: BotRuntime): Promise<void> {
+	if (!bot.isPriceReady()) return
+
 	calibrarPrecoCompra(bot)
 
 	const sold = await trySell(bot)

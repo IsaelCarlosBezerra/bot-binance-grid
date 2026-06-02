@@ -29,6 +29,7 @@ export class BotRuntime {
 	state: BotState
 	client: ReturnType<typeof Binance.prototype.options>
 	private _price: number | null = null
+	private _lastPriceUpdate: number | null = null
 	private _isRunning = false
 	private _timeoutId: NodeJS.Timeout | null = null
 
@@ -74,7 +75,12 @@ export class BotRuntime {
 
 	updatePrice(price: number): void {
 		this._price = price
+		this._lastPriceUpdate = Date.now()
 		this.state.currentPrice = price
+	}
+
+	getLastPriceUpdate(): number | null {
+		return this._lastPriceUpdate
 	}
 
 	getPrice(): number {

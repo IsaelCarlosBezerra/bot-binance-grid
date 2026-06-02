@@ -1,22 +1,20 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Header from "./components/Header"
 import StatusIndicator from "./components/StatusIndicator"
 import Controls from "./components/Controls"
 import FinancialSummary from "./components/FinancialSummary"
 import MarketState from "./components/MarketState"
-import BotConfiguration from "./components/BotConfiguration"
 import OpenPositions from "./components/OpenPositions"
 import LoginPage from "./components/LoginPage"
 import BotSetup from "./components/BotSetup"
+import SettingsPage from "./components/SettingsPage"
 import {
 	getToken,
 	clearToken,
 	getMe,
 	startBot,
 	stopBot,
-	saveConfig,
 	loadStatus,
-	loadBalance,
 	loadSummary,
 } from "./services/api"
 
@@ -24,9 +22,9 @@ function App() {
 	const [user, setUser] = useState(null)
 	const [authLoading, setAuthLoading] = useState(true)
 	const [botConfigured, setBotConfigured] = useState(false)
+	const [showSettings, setShowSettings] = useState(false)
 
 	const [data, setData] = useState(null)
-	const [balance, setBalance] = useState(0)
 	const [summary, setSummary] = useState(null)
 	const [summaryOpen, setSummaryOpen] = useState(null)
 
@@ -49,14 +47,22 @@ function App() {
 	}, [])
 
 	// ── Polling do dashboard ────────────────────────────────────────────────
+	const intervalRef = useRef(null)
+
 	const fetchAll = async () => {
-		const [status, bal, sum] = await Promise.all([
-			loadStatus(),
-			loadBalance(),
-			loadSummary(),
-		])
-		if (status) setData(status)
-		if (bal?.balance !== undefined) setBalance(bal.balance)
+		if (document.visibilityState === "hidden") return
+
+		const status = await loadStatus()
+
+		if (!status) {
+			// servidor offline — encerra tudo
+			clearInterval(intervalRef.current)
+			intervalRef.current = null
+			return
+		}
+
+		setData(status)
+		const sum = await loadSummary()
 		if (sum?.summary) {
 			setSummary(sum.summary)
 			setSummaryOpen(sum.summaryOpen)
@@ -66,8 +72,13 @@ function App() {
 	useEffect(() => {
 		if (!user || !botConfigured) return
 		fetchAll()
-		const interval = setInterval(fetchAll, 3000)
-		return () => clearInterval(interval)
+		intervalRef.current = setInterval(fetchAll, 3000)
+		const onVisible = () => { if (document.visibilityState === "visible") fetchAll() }
+		document.addEventListener("visibilitychange", onVisible)
+		return () => {
+			clearInterval(intervalRef.current)
+			document.removeEventListener("visibilitychange", onVisible)
+		}
 	}, [user, botConfigured])
 
 	// ── Handlers ────────────────────────────────────────────────────────────
@@ -85,16 +96,6 @@ function App() {
 	const handleStart = async () => { await startBot(); fetchAll() }
 	const handleStop = async () => { await stopBot(); fetchAll() }
 
-	const handleSaveConfig = async (config) => {
-		const result = await saveConfig(config)
-		if (result?.ok) {
-			alert("Configuração salva")
-			fetchAll()
-		} else {
-			alert("Erro ao salvar configuração")
-		}
-	}
-
 	// ── Render ───────────────────────────────────────────────────────────────
 	if (authLoading) return <div className="loading-screen">Carregando...</div>
 
@@ -103,6 +104,7 @@ function App() {
 	if (!botConfigured) return <BotSetup onSetup={() => setBotConfigured(true)} />
 
 	const openPositions = data?.openPositions ?? []
+	const balance = data?.state?.balance ?? 0
 	const alocado = {
 		valorAlocado: openPositions.reduce((a, p) => a + p.quantity * p.buyPrice, 0),
 		qtdAlocada: openPositions.reduce((a, p) => a + p.quantity, 0),
@@ -110,7 +112,21 @@ function App() {
 
 	return (
 		<>
-			<Header user={user} onLogout={handleLogout} />
+			<Header
+				user={user}
+				onLogout={handleLogout}
+				onSettings={() => setShowSettings(true)}
+			/>
+
+			{showSettings && (
+				<SettingsPage
+					config={data?.config}
+					user={user}
+					onSaved={() => { setShowSettings(false); fetchAll() }}
+					onClose={() => setShowSettings(false)}
+				/>
+			)}
+
 			<div className="container">
 				<StatusIndicator enabled={data?.running ?? false} />
 				<Controls
@@ -126,7 +142,6 @@ function App() {
 						summaryPrevisto={summaryOpen}
 					/>
 					<MarketState strategy={data?.state} />
-					<BotConfiguration config={data?.config} onSave={handleSaveConfig} />
 					<OpenPositions positions={openPositions} />
 				</div>
 			</div>
