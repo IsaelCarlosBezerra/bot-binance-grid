@@ -9,11 +9,20 @@ const prisma = new PrismaClient()
 class BotManager {
 	private instances: Map<string, BotRuntime> = new Map()
 	private symbolClients: Map<string, ReturnType<typeof Binance.prototype.options>> = new Map()
+	private priceIntervals: Map<string, ReturnType<typeof setInterval>> = new Map()
 
 	async loadAndStart(userId: string): Promise<BotRuntime> {
 		const existing = this.instances.get(userId)
 		if (existing?.isRunning) return existing
 
+		// Runtime existe mas estava parado — reconecta WebSocket e reinicializa estado
+		if (existing) {
+			this.subscribeToPrice(existing)
+			await this.initializeState(existing)
+			return existing
+		}
+
+		// Primeira carga — busca no banco e cria o runtime
 		const dbInstance = await prisma.botInstance.findUnique({
 			where: { userId },
 			include: { user: { select: { plan: true } } },
@@ -61,7 +70,6 @@ class BotManager {
 		try {
 			runtime = await this.loadAndStart(userId)
 		} catch (err) {
-			// Garante que instâncias inválidas não ficam presas no Map
 			this.instances.delete(userId)
 			throw err
 		}
@@ -73,14 +81,31 @@ class BotManager {
 		const runtime = this.instances.get(userId)
 		if (runtime) {
 			runtime.stop()
+			this.disconnectWebSocket(runtime)
 			prisma.botInstance.update({ where: { userId }, data: { enabled: false } }).catch(() => {})
 		}
 	}
 
 	remove(userId: string): void {
 		const runtime = this.instances.get(userId)
-		runtime?.stop()
+		if (runtime) {
+			runtime.stop()
+			this.disconnectWebSocket(runtime)
+		}
 		this.instances.delete(userId)
+	}
+
+	private disconnectWebSocket(runtime: BotRuntime): void {
+		const symbolKey = `${runtime.config.symbol}:${runtime.instanceId}`
+
+		const interval = this.priceIntervals.get(symbolKey)
+		if (interval) {
+			clearInterval(interval)
+			this.priceIntervals.delete(symbolKey)
+		}
+
+		this.symbolClients.delete(symbolKey)
+		console.log(`🔌 [${runtime.userId}] WebSocket ${runtime.config.symbol} desconectado`)
 	}
 
 	private async initializeState(runtime: BotRuntime): Promise<void> {
@@ -156,7 +181,7 @@ class BotManager {
 		connect()
 
 		// Verifica se o preço parou de atualizar e reconecta
-		setInterval(() => {
+		const intervalId = setInterval(() => {
 			const lastUpdate = runtime.getLastPriceUpdate()
 			if (lastUpdate && Date.now() - lastUpdate > 30_000) {
 				console.log(`🔄 [${runtime.userId}] WebSocket sem atualização — reconectando...`)
@@ -165,6 +190,8 @@ class BotManager {
 				this.symbolClients.set(symbolKey, client)
 			}
 		}, 30_000)
+
+		this.priceIntervals.set(symbolKey, intervalId)
 
 		console.log(`📡 [${runtime.userId}] WebSocket ${symbol} iniciado`)
 	}
