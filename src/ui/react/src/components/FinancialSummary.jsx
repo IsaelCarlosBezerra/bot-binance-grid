@@ -1,5 +1,5 @@
 export default function FinancialSummary({ summary, balance, alocado, summaryPrevisto }) {
-	if (!summary) {
+	if (!summary || !summaryPrevisto) {
 		return (
 			<div className="card">
 				<h3>Resumo Financeiro</h3>
@@ -9,9 +9,10 @@ export default function FinancialSummary({ summary, balance, alocado, summaryPre
 	}
 
 	const { compras, vendas, lucroLiquido, totalTaxas, totalIR } = summary
-	const { valorAlocado, qtdAlocada } = alocado
-	const saldoCarteira = valorAlocado + balance
-	const percentualAlocado = (valorAlocado / saldoCarteira) * 100
+	const { valorAlocado, qtdAlocada } = alocado ?? { valorAlocado: 0, qtdAlocada: 0 }
+	const bal = balance ?? 0
+	const saldoCarteira = valorAlocado + bal
+	const percentualAlocado = saldoCarteira > 0 ? (valorAlocado / saldoCarteira) * 100 : 0
 	const { vendasAbertas, lucroLiquidoAberto, totalTaxasAberto, totalIRAberto } = summaryPrevisto
 
 	return (
@@ -63,13 +64,13 @@ export default function FinancialSummary({ summary, balance, alocado, summaryPre
 			<div className="section">
 				<strong>Carteira</strong>
 				<div>Saldo Total {saldoCarteira.toFixed(2)} USDT</div>
-				<div>Saldo Livre {balance.toFixed(2)} USDT</div>
+				<div>Saldo Livre {bal.toFixed(2)} USDT</div>
 			</div>
 
 			<div className="section">
 				<strong>Alocado</strong>
 				<div>Valor Alocado {valorAlocado.toFixed(2)} USDT</div>
-				<div>Qtd. Alocada {qtdAlocada.toFixed(4)} USDT</div>
+				<div>Qtd. Alocada {qtdAlocada.toFixed(4)} BTC</div>
 				<div>% Alocado {percentualAlocado.toFixed(2)}%</div>
 			</div>
 		</div>

@@ -28,6 +28,7 @@ function App() {
 	const [data, setData] = useState(null)
 	const [balance, setBalance] = useState(0)
 	const [summary, setSummary] = useState(null)
+	const [summaryOpen, setSummaryOpen] = useState(null)
 
 	// ── Auth bootstrap ──────────────────────────────────────────────────────
 	useEffect(() => {
@@ -55,8 +56,11 @@ function App() {
 			loadSummary(),
 		])
 		if (status) setData(status)
-		if (bal) setBalance(bal.balance)
-		if (sum) setSummary(sum.summary)
+		if (bal?.balance !== undefined) setBalance(bal.balance)
+		if (sum?.summary) {
+			setSummary(sum.summary)
+			setSummaryOpen(sum.summaryOpen)
+		}
 	}
 
 	useEffect(() => {
@@ -119,7 +123,7 @@ function App() {
 						summary={summary}
 						balance={balance}
 						alocado={alocado}
-						summaryPrevisto={summary}
+						summaryPrevisto={summaryOpen}
 					/>
 					<MarketState strategy={data?.state} />
 					<BotConfiguration config={data?.config} onSave={handleSaveConfig} />
