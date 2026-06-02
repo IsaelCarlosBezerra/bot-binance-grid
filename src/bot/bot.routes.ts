@@ -200,4 +200,54 @@ export function registerBotRoutes(app: Express) {
 		}
 		res.json({ price: runtime.getPrice(), symbol: runtime.config.symbol })
 	})
+
+	// ── Compra manual ─────────────────────────────────────────────────────
+	app.post("/bot/buy", async (req: AuthRequest, res: Response) => {
+		const userId = req.user!.userId
+		const runtime = botManager.get(userId)
+
+		if (!runtime || !runtime.isPriceReady()) {
+			res.status(400).json({ error: "Bot não está ativo." })
+			return
+		}
+
+		const { symbol, qtd } = req.body
+		if (!symbol || !qtd) {
+			res.status(400).json({ error: "symbol e qtd são obrigatórios" })
+			return
+		}
+
+		const { getAssetBalance } = await import("../binance/account.service.js")
+		const { getSymbolFilters } = await import("../binance/filters.js")
+		const { validateAndAdjustOrder } = await import("../binance/order.validator.js")
+		const { addPosition } = await import("../positions/position.store.js")
+
+		const currentPrice = runtime.getPrice()
+		const filters = await getSymbolFilters(symbol, runtime.client)
+		const validation = validateAndAdjustOrder({ quantity: Number(qtd), price: currentPrice, filters })
+
+		if (!validation.valid || !validation.quantity) {
+			res.status(400).json({ error: validation.reason })
+			return
+		}
+
+		const freeBalance = await getAssetBalance("USDT", runtime.client)
+		if (freeBalance < validation.quantity * currentPrice) {
+			res.status(400).json({ error: "Saldo insuficiente" })
+			return
+		}
+
+		await runtime.client.marketBuy(symbol, validation.quantity)
+
+		const sellPrice = currentPrice / (1 - runtime.config.grossTargetPercentage)
+		await addPosition(runtime.instanceId, runtime.plan, {
+			symbol,
+			buyPrice: currentPrice,
+			quantity: validation.quantity,
+			sellPrice,
+			expectedNetProfit: runtime.config.targetNetProfit,
+		})
+
+		res.json({ ok: true, qty: validation.quantity, price: currentPrice })
+	})
 }

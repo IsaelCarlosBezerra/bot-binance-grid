@@ -3,6 +3,7 @@ import cors from "cors"
 import path from "path"
 import { registerAuthRoutes } from "../auth/auth.routes.js"
 import { registerBotRoutes } from "../bot/bot.routes.js"
+import { registerAdminRoutes } from "./admin.routes.js"
 
 export function startApi(port = 3001) {
 	const app = express()
@@ -14,6 +15,7 @@ export function startApi(port = 3001) {
 
 	registerAuthRoutes(app)
 	registerBotRoutes(app)
+	registerAdminRoutes(app)
 
 	app.listen(port, () => console.log(`🌐 API rodando em http://localhost:${port}`))
 }

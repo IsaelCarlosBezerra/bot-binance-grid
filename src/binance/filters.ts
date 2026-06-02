@@ -1,6 +1,3 @@
-// src/binance/filters.ts
-import { binanceClient as defaultClient } from "./client.js"
-
 export interface SymbolFilters {
 	minQty: number
 	maxQty: number
@@ -13,13 +10,11 @@ export interface BinanceSymbol {
 	filters: any[]
 }
 
-export async function getSymbolFilters(symbol: string, client = defaultClient): Promise<SymbolFilters> {
+export async function getSymbolFilters(symbol: string, client: any): Promise<SymbolFilters> {
 	const exchangeInfo = await client.exchangeInfo()
 	const symbolInfo = exchangeInfo.symbols.find((s: BinanceSymbol) => s.symbol === symbol)
 
-	if (!symbolInfo) {
-		throw new Error(`Símbolo não encontrado: ${symbol}`)
-	}
+	if (!symbolInfo) throw new Error(`Símbolo não encontrado: ${symbol}`)
 
 	const lotSize = symbolInfo.filters.find((f: any) => f.filterType === "LOT_SIZE")
 	const minNotional = symbolInfo.filters.find((f: any) => f.filterType === "NOTIONAL")

@@ -6,110 +6,124 @@ import FinancialSummary from "./components/FinancialSummary"
 import MarketState from "./components/MarketState"
 import BotConfiguration from "./components/BotConfiguration"
 import OpenPositions from "./components/OpenPositions"
+import LoginPage from "./components/LoginPage"
+import BotSetup from "./components/BotSetup"
 import {
+	getToken,
+	clearToken,
+	getMe,
 	startBot,
 	stopBot,
 	saveConfig,
 	loadStatus,
 	loadBalance,
-	loadAlocado,
-	loadSumaryPrevisto,
+	loadSummary,
 } from "./services/api"
 
 function App() {
+	const [user, setUser] = useState(null)
+	const [authLoading, setAuthLoading] = useState(true)
+	const [botConfigured, setBotConfigured] = useState(false)
+
 	const [data, setData] = useState(null)
 	const [balance, setBalance] = useState(0)
-	const [alocado, setAlocado] = useState({
-		valorAlocado: 0,
-		qtdAlocada: 0,
-	})
-	const [summaryPrevisto, setSummaryPrevisto] = useState(null)
+	const [summary, setSummary] = useState(null)
 
-	const fetchStatus = async () => {
-		const status = await loadStatus()
-		if (status) {
-			setData(status)
+	// ── Auth bootstrap ──────────────────────────────────────────────────────
+	useEffect(() => {
+		if (!getToken()) {
+			setAuthLoading(false)
+			return
 		}
-	}
+		getMe()
+			.then((res) => {
+				if (res?.user) {
+					setUser(res.user)
+					setBotConfigured(!!res.user.botInstance)
+				} else {
+					clearToken()
+				}
+			})
+			.finally(() => setAuthLoading(false))
+	}, [])
 
-	const fechtBalance = async () => {
-		const balance = await loadBalance()
-		if (balance) {
-			setBalance(balance.balance)
-		}
-	}
-
-	const fechtTotalAlocado = async () => {
-		const alocado = await loadAlocado()
-		if (alocado) {
-			setAlocado({ valorAlocado: alocado.valorAlocado, qtdAlocada: alocado.qtdAlocada })
-		}
-	}
-
-	const fechtResultadosPrevistos = async () => {
-		const summaryPrevisto = await loadSumaryPrevisto()
-
-		if (summaryPrevisto) {
-			setSummaryPrevisto(summaryPrevisto.summary)
-		}
+	// ── Polling do dashboard ────────────────────────────────────────────────
+	const fetchAll = async () => {
+		const [status, bal, sum] = await Promise.all([
+			loadStatus(),
+			loadBalance(),
+			loadSummary(),
+		])
+		if (status) setData(status)
+		if (bal) setBalance(bal.balance)
+		if (sum) setSummary(sum.summary)
 	}
 
 	useEffect(() => {
-		fetchStatus()
-		fechtBalance()
-		fechtTotalAlocado()
-		fechtResultadosPrevistos()
-		const interval = setInterval(fetchStatus, 3000)
+		if (!user || !botConfigured) return
+		fetchAll()
+		const interval = setInterval(fetchAll, 3000)
 		return () => clearInterval(interval)
-	}, [])
+	}, [user, botConfigured])
 
-	const handleStart = async () => {
-		await startBot()
-		fetchStatus()
-		fechtBalance()
-		fechtResultadosPrevistos()
+	// ── Handlers ────────────────────────────────────────────────────────────
+	const handleAuth = (u) => {
+		setUser(u)
+		setBotConfigured(false)
 	}
 
-	const handleStop = async () => {
-		await stopBot()
-		fetchStatus()
-		fechtBalance()
-		fechtResultadosPrevistos()
+	const handleLogout = () => {
+		clearToken()
+		setUser(null)
+		setData(null)
 	}
+
+	const handleStart = async () => { await startBot(); fetchAll() }
+	const handleStop = async () => { await stopBot(); fetchAll() }
 
 	const handleSaveConfig = async (config) => {
-		const success = await saveConfig(config)
-		if (success) {
+		const result = await saveConfig(config)
+		if (result?.ok) {
 			alert("Configuração salva")
-			fetchStatus()
-			fechtBalance()
-			fechtResultadosPrevistos()
+			fetchAll()
 		} else {
 			alert("Erro ao salvar configuração")
 		}
 	}
 
+	// ── Render ───────────────────────────────────────────────────────────────
+	if (authLoading) return <div className="loading-screen">Carregando...</div>
+
+	if (!user) return <LoginPage onAuth={handleAuth} />
+
+	if (!botConfigured) return <BotSetup onSetup={() => setBotConfigured(true)} />
+
+	const openPositions = data?.openPositions ?? []
+	const alocado = {
+		valorAlocado: openPositions.reduce((a, p) => a + p.quantity * p.buyPrice, 0),
+		qtdAlocada: openPositions.reduce((a, p) => a + p.quantity, 0),
+	}
+
 	return (
 		<>
-			<Header />
+			<Header user={user} onLogout={handleLogout} />
 			<div className="container">
-				<StatusIndicator enabled={data?.enabled || false} />
+				<StatusIndicator enabled={data?.running ?? false} />
 				<Controls
 					onStart={handleStart}
 					onStop={handleStop}
-					price={data?.strategy.currentPrice}
+					price={data?.state?.currentPrice}
 				/>
-
 				<div className="cards">
 					<FinancialSummary
-						summary={data?.summary}
+						summary={summary}
 						balance={balance}
 						alocado={alocado}
-						summaryPrevisto={summaryPrevisto}
+						summaryPrevisto={summary}
 					/>
-					<MarketState strategy={data?.strategy} />
+					<MarketState strategy={data?.state} />
 					<BotConfiguration config={data?.config} onSave={handleSaveConfig} />
-					<OpenPositions positions={data?.openPositions} />
+					<OpenPositions positions={openPositions} />
 				</div>
 			</div>
 		</>

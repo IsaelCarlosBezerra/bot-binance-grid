@@ -1,101 +1,101 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001"
 
-export const startBot = async () => {
-	try {
-		const response = await fetch(`${API_URL}/start`, { method: "POST" })
-		return response.ok
-	} catch (error) {
-		console.error("Error starting bot:", error)
-		return false
+// ─── Token ────────────────────────────────────────────────────────────────────
+
+export const getToken = () => localStorage.getItem("token")
+export const setToken = (token) => localStorage.setItem("token", token)
+export const clearToken = () => localStorage.removeItem("token")
+
+function authHeaders() {
+	return {
+		"Content-Type": "application/json",
+		Authorization: `Bearer ${getToken()}`,
 	}
 }
 
-export const stopBot = async () => {
+async function request(path, options = {}) {
 	try {
-		const response = await fetch(`${API_URL}/stop`, { method: "POST" })
-		return response.ok
-	} catch (error) {
-		console.error("Error stopping bot:", error)
-		return false
-	}
-}
-
-export const saveConfig = async (config) => {
-	try {
-		const response = await fetch(`${API_URL}/config`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(config),
-		})
-		return response.ok
-	} catch (error) {
-		console.error("Error saving config:", error)
-		return false
-	}
-}
-
-export const loadStatus = async () => {
-	try {
-		const response = await fetch(`${API_URL}/status`)
-		if (!response.ok) {
-			throw new Error("Failed to load status")
+		const res = await fetch(`${API_URL}${path}`, options)
+		if (res.status === 401) {
+			clearToken()
+			window.location.reload()
+			return null
 		}
-		return await response.json()
-	} catch (error) {
-		console.error("Error loading status:", error)
+		return res.ok ? res.json() : null
+	} catch {
 		return null
 	}
 }
 
-export const loadBalance = async () => {
-	try {
-		const response = await fetch(`${API_URL}/balance`)
-		if (!response.ok) {
-			throw new Error("Failed to load balance")
-		}
-		return await response.json()
-	} catch (error) {
-		console.error("Error loading balance:", error)
-		return null
-	}
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+export const login = async (email, password) => {
+	const res = await fetch(`${API_URL}/auth/login`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ email, password }),
+	})
+	const data = await res.json()
+	if (!res.ok) throw new Error(data.error || "Erro ao fazer login")
+	setToken(data.token)
+	return data.user
 }
 
-export const loadAlocado = async () => {
-	try {
-		const response = await fetch(`${API_URL}/alocado`)
-		if (!response.ok) {
-			throw new Error("Failed to load total alocado")
-		}
-		return await response.json()
-	} catch (error) {
-		console.error("Error loading total alocado:", error)
-		return null
-	}
+export const register = async (name, email, password) => {
+	const res = await fetch(`${API_URL}/auth/register`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ name, email, password }),
+	})
+	const data = await res.json()
+	if (!res.ok) throw new Error(data.error || "Erro ao cadastrar")
+	setToken(data.token)
+	return data.user
 }
 
-export const loadSumaryPrevisto = async () => {
-	try {
-		const response = await fetch(`${API_URL}/sumaryprevisto`)
-		if (!response.ok) {
-			throw new Error("Failed to load Resultados Previstos")
-		}
-		return await response.json()
-	} catch (error) {
-		console.error("Error loading Resultados Previstos:", error)
-		return null
-	}
-}
+export const getMe = () =>
+	request("/auth/me", { headers: authHeaders() })
 
-export const buy = async ({ symbol, qtd }) => {
-	try {
-		const response = await fetch(`${API_URL}/buy`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ symbol, qtd }),
-		})
-		return response.ok
-	} catch (error) {
-		console.error("Error saving config:", error)
-		return false
-	}
-}
+// ─── Bot ──────────────────────────────────────────────────────────────────────
+
+export const loadStatus = () =>
+	request("/bot/status", { headers: authHeaders() })
+
+export const startBot = () =>
+	request("/bot/start", { method: "POST", headers: authHeaders() })
+
+export const stopBot = () =>
+	request("/bot/stop", { method: "POST", headers: authHeaders() })
+
+export const saveConfig = (config) =>
+	request("/bot/config", {
+		method: "PATCH",
+		headers: authHeaders(),
+		body: JSON.stringify(config),
+	})
+
+export const setupBot = (payload) =>
+	request("/bot/setup", {
+		method: "POST",
+		headers: authHeaders(),
+		body: JSON.stringify(payload),
+	})
+
+export const loadBalance = () =>
+	request("/bot/balance", { headers: authHeaders() })
+
+export const loadPositions = () =>
+	request("/bot/positions", { headers: authHeaders() })
+
+export const loadSummary = () =>
+	request("/bot/summary", { headers: authHeaders() })
+
+export const loadPrice = () =>
+	request("/bot/price", { headers: authHeaders() })
+
+export const buy = ({ symbol, qtd }) =>
+	request("/bot/buy", {
+		method: "POST",
+		headers: authHeaders(),
+		body: JSON.stringify({ symbol, qtd }),
+	})
