@@ -10,6 +10,7 @@ class BotManager {
 	private instances: Map<string, BotRuntime> = new Map()
 	private symbolClients: Map<string, ReturnType<typeof Binance.prototype.options>> = new Map()
 	private priceIntervals: Map<string, ReturnType<typeof setInterval>> = new Map()
+	private wsEndpoints: Map<string, string> = new Map()
 
 	async loadAndStart(userId: string): Promise<BotRuntime> {
 		const existing = this.instances.get(userId)
@@ -98,10 +99,22 @@ class BotManager {
 	private disconnectWebSocket(runtime: BotRuntime): void {
 		const symbolKey = `${runtime.config.symbol}:${runtime.instanceId}`
 
+		// Para o interval de reconexão automática
 		const interval = this.priceIntervals.get(symbolKey)
 		if (interval) {
 			clearInterval(interval)
 			this.priceIntervals.delete(symbolKey)
+		}
+
+		// Fecha a conexão WebSocket real
+		const endpoint = this.wsEndpoints.get(symbolKey)
+		if (endpoint) {
+			try {
+				runtime.client.websockets.terminate(endpoint)
+			} catch {
+				// ignora erros ao fechar — o importante é limpar o estado
+			}
+			this.wsEndpoints.delete(symbolKey)
 		}
 
 		this.symbolClients.delete(symbolKey)
@@ -165,14 +178,19 @@ class BotManager {
 
 		const connect = () => {
 			try {
-				client.websockets.miniTicker((ticker: Record<string, { close: string }>) => {
-					if (ticker[symbol]) {
-						const price = Number(ticker[symbol]!.close)
-						if (!Number.isNaN(price)) {
-							runtime.updatePrice(price)
+				const endpoint = client.websockets.miniTicker(
+					(ticker: Record<string, { close: string }>) => {
+						if (ticker[symbol]) {
+							const price = Number(ticker[symbol]!.close)
+							if (!Number.isNaN(price)) {
+								runtime.updatePrice(price)
+							}
 						}
-					}
-				})
+					},
+				)
+				if (typeof endpoint === "string") {
+					this.wsEndpoints.set(symbolKey, endpoint)
+				}
 			} catch (err) {
 				console.error(`⚠️ [${runtime.userId}] Erro ao conectar WebSocket:`, err)
 			}
@@ -185,6 +203,11 @@ class BotManager {
 			const lastUpdate = runtime.getLastPriceUpdate()
 			if (lastUpdate && Date.now() - lastUpdate > 30_000) {
 				console.log(`🔄 [${runtime.userId}] WebSocket sem atualização — reconectando...`)
+				const oldEndpoint = this.wsEndpoints.get(symbolKey)
+				if (oldEndpoint) {
+					try { client.websockets.terminate(oldEndpoint) } catch {}
+					this.wsEndpoints.delete(symbolKey)
+				}
 				this.symbolClients.delete(symbolKey)
 				connect()
 				this.symbolClients.set(symbolKey, client)
@@ -192,7 +215,6 @@ class BotManager {
 		}, 30_000)
 
 		this.priceIntervals.set(symbolKey, intervalId)
-
 		console.log(`📡 [${runtime.userId}] WebSocket ${symbol} iniciado`)
 	}
 }
