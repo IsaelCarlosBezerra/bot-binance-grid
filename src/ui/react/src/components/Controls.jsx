@@ -8,7 +8,7 @@ export default function Controls({ onStart, onStop, price }) {
 	const [qtd, setQtd] = useState("")
 
 	const comprar = async (symbol, qtd) => {
-		if (confirm(`Confirma ordem de compra no valor de ${valor.toFixed(2)} USDT`)) {
+		if (confirm(`Confirma compra de ${qtd} BTC por ${valor.toFixed(2)} USDT?`)) {
 			const success = await buy({ symbol, qtd })
 			if (!success) alert("Erro ao executar compra")
 		}
@@ -28,22 +28,20 @@ export default function Controls({ onStart, onStop, price }) {
 		<div className="controls">
 			<div className="controls-actions">
 				<button className="start" onClick={onStart}>▶ Iniciar</button>
-				<button className="stop" onClick={onStop}>⏸ Parar</button>
+				<button className="stop" onClick={onStop}>⏸ Pausar</button>
 			</div>
 			<div className="controlsbuy">
-				<label style={{ margin: 0, fontSize: 13 }}>BTCUSDT</label>
-				<label style={{ margin: 0, fontSize: 13, color: "var(--text-secondary)" }}>
-					{valor.toFixed(2)} USDT
-				</label>
+				<span className="controlsbuy-label">BTCUSDT</span>
+				<span className="controlsbuy-label">{valor.toFixed(2)} USDT</span>
 				<input
-					min={0}
 					type="number"
+					min={0}
 					placeholder="0.00"
 					onChange={handleChangeQtd}
 					autoComplete="off"
 				/>
 				<button
-					disabled={!Number(qtd) > 0}
+					disabled={!(Number(qtd) > 0)}
 					onClick={() => comprar("BTCUSDT", qtd)}
 					className="comprar"
 				>

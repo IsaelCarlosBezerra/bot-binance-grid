@@ -1,13 +1,16 @@
 export default function Header({ user, onLogout, onSettings }) {
 	return (
 		<header className="header">
-			<span className="header-title">🤖 Grid Bot</span>
+			<div className="header-logo">
+				<div className="header-logo-icon">🤖</div>
+				<span>Grid Bot</span>
+			</div>
 			{user && (
 				<div className="header-user">
 					<span className={`plan-badge plan-${user.plan?.toLowerCase()}`}>{user.plan}</span>
 					<span className="header-email">{user.email}</span>
-					<button className="logout-btn" onClick={onSettings}>⚙ Config</button>
-					<button className="logout-btn" onClick={onLogout}>Sair</button>
+					<button className="icon-btn" onClick={onSettings} title="Configurações">⚙</button>
+					<button className="icon-btn" onClick={onLogout} title="Sair">↪</button>
 				</div>
 			)}
 		</header>

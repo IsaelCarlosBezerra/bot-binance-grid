@@ -2,42 +2,42 @@ export default function OpenPositions({ positions }) {
 	if (!positions || positions.length === 0) {
 		return (
 			<div className="card">
-				<h3>Posições Abertas</h3>
-				<div className="no-positions">Nenhuma posição aberta no momento.</div>
+				<div className="card-title">Posições Abertas</div>
+				<div className="no-positions">Nenhuma posição aberta</div>
 			</div>
 		)
 	}
 
 	return (
 		<div className="card">
-			<h3>Posições Abertas</h3>
+			<div className="card-title">Posições Abertas · {positions.length}</div>
 			<div className="table-wrap">
 				<table>
 					<thead>
 						<tr>
 							<th>Status</th>
 							<th>Compra</th>
-							<th>Venda alvo</th>
+							<th>Alvo</th>
 							<th>Qtd</th>
 							<th>Investido</th>
 							<th>Lucro esp.</th>
 						</tr>
 					</thead>
 					<tbody>
-						{positions.map((position, index) => {
-							const invested = position.buyPrice * position.quantity
-							const expectedProfit = (position.sellPrice - position.buyPrice) * position.quantity
-
+						{positions.map((pos, i) => {
+							const invested = pos.buyPrice * pos.quantity
+							const profit = (pos.sellPrice - pos.buyPrice) * pos.quantity
 							return (
-								<tr key={index}>
-									<td>{position.status}</td>
-									<td>{position.buyPrice.toFixed(2)}</td>
-									<td>{position.sellPrice.toFixed(2)}</td>
-									<td>{position.quantity}</td>
+								<tr key={i}>
+									<td>
+										<span className="status-badge">OPEN</span>
+									</td>
+									<td>{pos.buyPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td>
+									<td>{pos.sellPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td>
+									<td>{pos.quantity}</td>
 									<td>{invested.toFixed(2)}</td>
-									<td className={expectedProfit >= 0 ? "positive" : "negative"}>
-										{expectedProfit >= 0 ? "+" : ""}
-										{expectedProfit.toFixed(2)}
+									<td className={profit >= 0 ? "positive" : "negative"}>
+										{profit >= 0 ? "+" : ""}{profit.toFixed(2)}
 									</td>
 								</tr>
 							)
