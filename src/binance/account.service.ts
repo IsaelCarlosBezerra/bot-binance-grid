@@ -1,4 +1,4 @@
-import { binanceClient } from "./client.js"
+import { binanceClient as defaultClient } from "./client.js"
 
 interface Balance {
 	asset: string
@@ -6,15 +6,14 @@ interface Balance {
 	locked: string
 }
 
-export async function getAccountBalances(): Promise<Balance[]> {
-	await binanceClient.useServerTime()
-	const account = await binanceClient.account()
+export async function getAccountBalances(client = defaultClient): Promise<Balance[]> {
+	await client.useServerTime()
+	const account = await client.account()
 	return account.balances
 }
 
-export async function getAssetBalance(asset: string) {
-	const balances = await getAccountBalances()
+export async function getAssetBalance(asset: string, client = defaultClient): Promise<number> {
+	const balances = await getAccountBalances(client)
 	const balance = balances.find((b) => b.asset === asset)
-	const freeBalance = !balance ? 0 : Number(balance?.free)
-	return freeBalance
+	return !balance ? 0 : Number(balance.free)
 }

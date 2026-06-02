@@ -1,94 +1,106 @@
-// src/positions/position.store.ts
-import fs from "fs"
-import path from "path"
+import { PrismaClient } from "@prisma/client"
 import type { Position, PositionStatus } from "./position.model.js"
-import { randomUUID } from "crypto"
 
-const DATA_DIR = path.resolve(process.cwd(), "data")
-const FILE_PATH = path.join(DATA_DIR, "positions.json")
+const prisma = new PrismaClient()
 
-// 🟢 O CACHE: A variável que o bot consultará em tempo real
-let positionsCache: Position[] = []
+const PLAN_LIMITS = {
+	FREE: 3,
+	PRO: Infinity,
+}
 
-function ensureDataDir() {
-	if (!fs.existsSync(DATA_DIR)) {
-		fs.mkdirSync(DATA_DIR)
+function toPosition(row: {
+	id: string
+	symbol: string
+	buyPrice: { toNumber: () => number }
+	quantity: { toNumber: () => number }
+	sellPrice: { toNumber: () => number } | null
+	expectedNetProfit: { toNumber: () => number }
+	createdAt: bigint
+	status: string
+}): Position {
+	return {
+		id: row.id,
+		symbol: row.symbol,
+		buyPrice: row.buyPrice.toNumber(),
+		quantity: row.quantity.toNumber(),
+		sellPrice: row.sellPrice?.toNumber() ?? 0,
+		expectedNetProfit: row.expectedNetProfit.toNumber(),
+		createdAt: Number(row.createdAt),
+		status: row.status as PositionStatus,
 	}
 }
 
-// 🔵 Carrega do disco para o Cache (roda apenas uma vez no início)
-function loadFromDisk() {
-	ensureDataDir()
-	if (!fs.existsSync(FILE_PATH)) {
-		positionsCache = []
-		return
-	}
-	const raw = fs.readFileSync(FILE_PATH, "utf-8")
-	positionsCache = JSON.parse(raw) as Position[]
-}
-
-// 🔵 Salva o Cache no disco (Persistência)
-function persist() {
-	ensureDataDir()
-	fs.writeFileSync(FILE_PATH, JSON.stringify(positionsCache, null, 2))
-}
-
-// Inicializa o cache imediatamente ao carregar o módulo
-loadFromDisk()
-
-export function addPosition(position: Omit<Position, "id" | "createdAt" | "status">) {
-	const newPosition: Position = {
-		...position,
-		id: randomUUID(),
-		createdAt: Date.now(),
-		status: "OPEN",
+export async function addPosition(
+	botInstanceId: string,
+	plan: "FREE" | "PRO",
+	position: Omit<Position, "id" | "createdAt" | "status">,
+): Promise<Position | null> {
+	const limit = PLAN_LIMITS[plan]
+	if (limit !== Infinity) {
+		const openCount = await prisma.tradeOrder.count({
+			where: { botInstanceId, status: "OPEN" },
+		})
+		if (openCount >= limit) {
+			console.log(`⚠️ Limite do plano ${plan} atingido (${limit} posições)`)
+			return null
+		}
 	}
 
-	// Atualiza a RAM e depois o Disco
-	positionsCache.push(newPosition)
-	persist()
-
-	return newPosition
+	const row = await prisma.tradeOrder.create({
+		data: {
+			botInstanceId,
+			symbol: position.symbol,
+			buyPrice: position.buyPrice,
+			quantity: position.quantity,
+			sellPrice: position.sellPrice,
+			expectedNetProfit: position.expectedNetProfit,
+			createdAt: BigInt(Date.now()),
+			status: "OPEN",
+		},
+	})
+	return toPosition(row)
 }
 
-export function closePosition(id: string) {
-	const status: PositionStatus = "CLOSED"
-
-	// Atualiza na RAM instantaneamente
-	positionsCache = positionsCache.map((p) => (p.id === id ? { ...p, status } : p))
-
-	// Salva no disco
-	persist()
+export async function closePosition(botInstanceId: string, id: string): Promise<void> {
+	await prisma.tradeOrder.updateMany({
+		where: { id, botInstanceId },
+		data: { status: "CLOSED" },
+	})
 }
 
-export function atualizaPriceVendaPosition(id: string, newPrice: number) {
-	// Atualiza na RAM instantaneamente
-	positionsCache = positionsCache.map((p) => (p.id === id ? { ...p, sellPrice: newPrice } : p))
-
-	// Salva no disco
-	persist()
+export async function atualizaPriceVendaPosition(
+	botInstanceId: string,
+	id: string,
+	newPrice: number,
+): Promise<void> {
+	await prisma.tradeOrder.updateMany({
+		where: { id, botInstanceId },
+		data: { sellPrice: newPrice },
+	})
 }
 
-export function getOpenPositions(): Position[] {
-	// Busca na RAM (muito rápido)
-	const openPositions = positionsCache.filter((p) => p.status === "OPEN")
-	return openPositions.sort((a, b) => b.buyPrice - a.buyPrice)
+export async function getOpenPositions(botInstanceId: string): Promise<Position[]> {
+	const rows = await prisma.tradeOrder.findMany({
+		where: { botInstanceId, status: "OPEN" },
+		orderBy: { buyPrice: "desc" },
+	})
+	return rows.map(toPosition)
 }
 
-export function getClosedPositions(): Position[] {
-	// Busca na RAM (muito rápido)
-	const openPositions = positionsCache.filter((p) => p.status === "CLOSED")
-	return openPositions.sort((a, b) => a.createdAt - b.createdAt)
+export async function getClosedPositions(botInstanceId: string): Promise<Position[]> {
+	const rows = await prisma.tradeOrder.findMany({
+		where: { botInstanceId, status: "CLOSED" },
+		orderBy: { createdAt: "asc" },
+	})
+	return rows.map(toPosition)
 }
 
-export function getAllPositions(): Position[] {
-	// Busca na RAM (muito rápido)
-	return positionsCache
+export async function getAllPositions(botInstanceId: string): Promise<Position[]> {
+	const rows = await prisma.tradeOrder.findMany({ where: { botInstanceId } })
+	return rows.map(toPosition)
 }
 
-export function getUltimaPositionOpen() {
-	// Trabalha apenas com os dados da RAM
-	const positions = getOpenPositions()
-	//const ordenadas = positions.sort((a, b) => a.createdAt - b.createdAt)
+export async function getUltimaPositionOpen(botInstanceId: string): Promise<Position | undefined> {
+	const positions = await getOpenPositions(botInstanceId)
 	return positions.at(-1)
 }

@@ -1,5 +1,5 @@
 // src/binance/filters.ts
-import { binanceClient } from "./client.js"
+import { binanceClient as defaultClient } from "./client.js"
 
 export interface SymbolFilters {
 	minQty: number
@@ -13,8 +13,8 @@ export interface BinanceSymbol {
 	filters: any[]
 }
 
-export async function getSymbolFilters(symbol: string): Promise<SymbolFilters> {
-	const exchangeInfo = await binanceClient.exchangeInfo()
+export async function getSymbolFilters(symbol: string, client = defaultClient): Promise<SymbolFilters> {
+	const exchangeInfo = await client.exchangeInfo()
 	const symbolInfo = exchangeInfo.symbols.find((s: BinanceSymbol) => s.symbol === symbol)
 
 	if (!symbolInfo) {

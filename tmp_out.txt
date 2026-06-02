@@ -1,0 +1,7 @@
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+📡 WebSocket miniTicker iniciado
+🌐 API rodando em http://localhost:3001
+ℹ️ Nenhuma posição aberta no reinício
+▶️ Ciclo do bot iniciado
+🤖 Bot totalmente operacional

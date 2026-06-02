@@ -1,136 +1,67 @@
-import type { Position } from "../positions/position.model.js"
 import { getClosedPositions, getOpenPositions } from "../positions/position.store.js"
 
-const BINANCE_FEE_RATE = 0.001 // 0,1%
-const IR_RATE = 0.15 // 15%
+const BINANCE_FEE_RATE = 0.001
+const IR_RATE = 0.15
 
 export interface TradeSummary {
-	compras: {
-		quantidade: number
-		valorTotal: number
-	}
-	vendas: {
-		quantidade: number
-		valorTotal: number
-	}
+	compras: { quantidade: number; valorTotal: number }
+	vendas: { quantidade: number; valorTotal: number }
 	lucroLiquido: number
 	totalTaxas: number
 	totalIR: number
 }
 
 export interface TradeSummaryAbertos {
-	comprasAbertas: {
-		quantidade: number
-		valorTotal: number
-	}
-	vendasAbertas: {
-		quantidade: number
-		valorTotal: number
-	}
+	comprasAbertas: { quantidade: number; valorTotal: number }
+	vendasAbertas: { quantidade: number; valorTotal: number }
 	lucroLiquidoAberto: number
 	totalTaxasAberto: number
 	totalIRAberto: number
 }
 
-export function generateTradeSummary(): TradeSummary {
-	const closed = getClosedPositions()
+export async function generateTradeSummary(botInstanceId: string): Promise<TradeSummary> {
+	const closed = await getClosedPositions(botInstanceId)
 
-	let comprasQtd = 0
-	let comprasValor = 0
-
-	let vendasQtd = 0
-	let vendasValor = 0
-
-	let totalTaxas = 0
-	let totalIR = 0
+	let comprasQtd = 0, comprasValor = 0, vendasQtd = 0, vendasValor = 0, totalTaxas = 0, totalIR = 0
 
 	for (const p of closed) {
 		const buyValue = p.buyPrice * p.quantity
 		const sellValue = p.sellPrice * p.quantity
-
-		// Compras
-		comprasQtd += 1
-		comprasValor += buyValue
-
-		// Vendas
-		vendasQtd += 1
-		vendasValor += sellValue
-
-		// Taxas Binance (compra + venda)
-		totalTaxas += buyValue * BINANCE_FEE_RATE
-		totalTaxas += sellValue * BINANCE_FEE_RATE
-
-		// Lucro bruto da operação
+		comprasQtd++; comprasValor += buyValue
+		vendasQtd++; vendasValor += sellValue
+		totalTaxas += buyValue * BINANCE_FEE_RATE + sellValue * BINANCE_FEE_RATE
 		const lucroBruto = sellValue - buyValue
-
-		// IR sobre lucro
 		totalIR += lucroBruto > 0 ? lucroBruto * IR_RATE : 0
 	}
 
-	const lucroLiquido = vendasValor - comprasValor - totalTaxas - totalIR
-
 	return {
-		compras: {
-			quantidade: comprasQtd,
-			valorTotal: comprasValor,
-		},
-		vendas: {
-			quantidade: vendasQtd,
-			valorTotal: vendasValor,
-		},
-		lucroLiquido,
+		compras: { quantidade: comprasQtd, valorTotal: comprasValor },
+		vendas: { quantidade: vendasQtd, valorTotal: vendasValor },
+		lucroLiquido: vendasValor - comprasValor - totalTaxas - totalIR,
 		totalTaxas,
 		totalIR,
 	}
 }
 
-export function generateTradeSummaryOpen(): TradeSummaryAbertos {
-	const open = getOpenPositions()
+export async function generateTradeSummaryOpen(botInstanceId: string): Promise<TradeSummaryAbertos> {
+	const open = await getOpenPositions(botInstanceId)
 
-	let comprasQtd = 0
-	let comprasValor = 0
-
-	let vendasQtd = 0
-	let vendasValor = 0
-
-	let totalTaxas = 0
-	let totalIR = 0
+	let comprasQtd = 0, comprasValor = 0, vendasQtd = 0, vendasValor = 0, totalTaxas = 0, totalIR = 0
 
 	for (const p of open) {
 		const buyValue = p.buyPrice * p.quantity
 		const sellValue = p.sellPrice * p.quantity
-
-		// Compras
-		comprasQtd += 1
-		comprasValor += buyValue
-
-		// Vendas
-		vendasQtd += 1
-		vendasValor += sellValue
-
-		// Taxas Binance (compra + venda)
-		totalTaxas += buyValue * BINANCE_FEE_RATE
-		totalTaxas += sellValue * BINANCE_FEE_RATE
-
-		// Lucro bruto da operação
+		comprasQtd++; comprasValor += buyValue
+		vendasQtd++; vendasValor += sellValue
+		totalTaxas += buyValue * BINANCE_FEE_RATE + sellValue * BINANCE_FEE_RATE
 		const lucroBruto = sellValue - buyValue
-
-		// IR sobre lucro
 		totalIR += lucroBruto > 0 ? lucroBruto * IR_RATE : 0
 	}
 
-	const lucroLiquido = vendasValor - comprasValor - totalTaxas - totalIR
-
 	return {
-		comprasAbertas: {
-			quantidade: comprasQtd,
-			valorTotal: comprasValor,
-		},
-		vendasAbertas: {
-			quantidade: vendasQtd,
-			valorTotal: vendasValor,
-		},
-		lucroLiquidoAberto: lucroLiquido,
+		comprasAbertas: { quantidade: comprasQtd, valorTotal: comprasValor },
+		vendasAbertas: { quantidade: vendasQtd, valorTotal: vendasValor },
+		lucroLiquidoAberto: vendasValor - comprasValor - totalTaxas - totalIR,
 		totalTaxasAberto: totalTaxas,
 		totalIRAberto: totalIR,
 	}
