@@ -23,24 +23,34 @@ body {
 	padding: 0;
 }
 
+/* ── Header ───────────────────────────────────────────────────────────── */
+
 header,
 .header {
 	background: var(--bg-secondary);
-	padding: 16px 24px;
-	font-size: 20px;
+	padding: 12px 24px;
+	font-size: 18px;
 	font-weight: bold;
 	border-bottom: 1px solid var(--border-color);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 12px;
+}
+
+.header-title {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .header-user {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 8px;
 	font-size: 14px;
 	font-weight: normal;
+	flex-shrink: 0;
 }
 
 .header-email {
@@ -48,13 +58,15 @@ header,
 }
 
 .logout-btn {
-	padding: 6px 12px;
+	padding: 7px 12px;
 	font-size: 13px;
 	background: transparent;
 	border: 1px solid var(--border-color);
 	color: var(--text-secondary);
 	border-radius: 6px;
 	cursor: pointer;
+	touch-action: manipulation;
+	white-space: nowrap;
 }
 
 .logout-btn:hover {
@@ -68,6 +80,7 @@ header,
 	font-size: 11px;
 	font-weight: bold;
 	text-transform: uppercase;
+	white-space: nowrap;
 }
 
 .plan-free {
@@ -97,6 +110,7 @@ header,
 	align-items: center;
 	justify-content: center;
 	background: var(--bg-secondary);
+	padding: 16px;
 }
 
 .login-card {
@@ -138,6 +152,7 @@ header,
 	font-size: 14px;
 	cursor: pointer;
 	font-weight: normal;
+	touch-action: manipulation;
 }
 
 .login-tab.active {
@@ -154,12 +169,12 @@ header,
 
 .login-input {
 	width: 100%;
-	padding: 10px 12px;
+	padding: 12px;
 	border-radius: 6px;
 	border: 1px solid var(--border-color);
 	background: var(--bg-secondary);
 	color: var(--text-primary);
-	font-size: 14px;
+	font-size: 16px; /* 16px evita zoom automático no iOS */
 }
 
 .login-input:focus {
@@ -168,7 +183,7 @@ header,
 }
 
 .login-btn {
-	padding: 12px;
+	padding: 14px;
 	background: var(--text-highlight);
 	color: #0f172a;
 	border: none;
@@ -177,6 +192,7 @@ header,
 	font-weight: bold;
 	cursor: pointer;
 	margin-top: 4px;
+	touch-action: manipulation;
 }
 
 .login-btn:disabled {
@@ -190,6 +206,8 @@ header,
 	margin: 0;
 }
 
+/* ── Dashboard ────────────────────────────────────────────────────────── */
+
 .container {
 	padding: 24px;
 	max-width: 1100px;
@@ -200,7 +218,7 @@ header,
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	margin-bottom: 24px;
+	margin-bottom: 20px;
 }
 
 .dot {
@@ -208,6 +226,7 @@ header,
 	height: 12px;
 	border-radius: 50%;
 	background: gray;
+	flex-shrink: 0;
 }
 
 .dot.on {
@@ -221,14 +240,26 @@ header,
 .controls {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 	gap: 12px;
 	margin-bottom: 10px;
+	flex-wrap: wrap;
+}
+
+.controls-actions {
+	display: flex;
+	gap: 8px;
 }
 
 .controlsbuy {
 	display: flex;
 	align-items: center;
-	gap: 12px;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.controlsbuy input {
+	width: 120px;
 }
 
 button {
@@ -238,6 +269,8 @@ button {
 	border: none;
 	cursor: pointer;
 	font-weight: bold;
+	touch-action: manipulation;
+	min-height: 44px;
 }
 
 .comprar {
@@ -252,7 +285,6 @@ button {
 .start {
 	background: var(--color-success);
 	color: var(--color-success-dark);
-	margin-right: 12px;
 }
 
 .start:hover {
@@ -276,6 +308,7 @@ button {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 24px;
+	margin-top: 16px;
 }
 
 .card {
@@ -283,6 +316,7 @@ button {
 	padding: 16px;
 	border-radius: 8px;
 	border: 1px solid var(--border-color);
+	min-width: 0; /* evita overflow em grid */
 }
 
 .card h3 {
@@ -316,7 +350,7 @@ input {
 	border: 1px solid var(--border-color);
 	background: var(--bg-secondary);
 	color: var(--text-secondary);
-	font-size: 14px;
+	font-size: 16px; /* evita zoom no iOS */
 }
 
 input:focus {
@@ -350,10 +384,18 @@ input:focus {
 	font-weight: bold;
 }
 
+/* ── Tabela ───────────────────────────────────────────────────────────── */
+
+.table-wrap {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
 table {
 	width: 100%;
 	border-collapse: collapse;
 	font-size: 13px;
+	min-width: 480px;
 }
 
 th,
@@ -361,10 +403,10 @@ td {
 	padding: 8px;
 	border-bottom: 1px solid var(--border-color);
 	text-align: right;
+	white-space: nowrap;
 }
 
 th {
-	text-align: right;
 	color: var(--text-highlight);
 }
 
@@ -392,6 +434,7 @@ tbody tr:hover {
 	align-items: center;
 	justify-content: center;
 	z-index: 100;
+	padding: 16px;
 }
 
 .settings-modal {
@@ -422,9 +465,10 @@ tbody tr:hover {
 	background: transparent;
 	border: none;
 	color: var(--text-secondary);
-	font-size: 18px;
+	font-size: 20px;
 	cursor: pointer;
 	padding: 4px 8px;
+	min-height: auto;
 }
 
 .settings-close:hover {
@@ -438,6 +482,7 @@ tbody tr:hover {
 	margin-bottom: 20px;
 	font-size: 13px;
 	color: var(--text-secondary);
+	flex-wrap: wrap;
 }
 
 .settings-form {
@@ -460,12 +505,12 @@ tbody tr:hover {
 
 .settings-field select {
 	width: 100%;
-	padding: 8px 10px;
+	padding: 10px;
 	border-radius: 6px;
 	border: 1px solid var(--border-color);
 	background: var(--bg-secondary);
 	color: var(--text-primary);
-	font-size: 14px;
+	font-size: 16px;
 }
 
 .settings-hint {
@@ -492,12 +537,85 @@ tbody tr:hover {
 	color: var(--color-danger);
 }
 
+/* ── Responsivo ──────────────────────────────────────────────────────── */
+
 @media (max-width: 768px) {
 	.cards {
 		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+}
+
+@media (max-width: 640px) {
+	/* Header */
+	.header {
+		padding: 10px 14px;
+		font-size: 15px;
+	}
+
+	.header-email {
+		display: none;
+	}
+
+	.header-title {
+		font-size: 14px;
+	}
+
+	.logout-btn {
+		padding: 6px 10px;
+		font-size: 12px;
+	}
+
+	/* Container */
+	.container {
+		padding: 14px;
+	}
+
+	/* Controls */
+	.controls {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.controls-actions {
+		width: 100%;
+	}
+
+	.controls-actions .start,
+	.controls-actions .stop {
+		flex: 1;
+	}
+
+	.controlsbuy {
+		width: 100%;
+	}
+
+	.controlsbuy input {
+		flex: 1;
+		width: auto;
+		min-width: 80px;
+	}
+
+	.controlsbuy .comprar {
+		flex-shrink: 0;
+	}
+
+	/* Login */
+	.login-card {
+		padding: 28px 20px;
+		border-radius: 10px;
+	}
+
+	/* Settings — bottom sheet */
+	.settings-overlay {
+		align-items: flex-end;
+		padding: 0;
 	}
 
 	.settings-modal {
-		margin: 16px;
+		border-radius: 16px 16px 0 0;
+		max-height: 92vh;
+		max-width: 100%;
+		padding: 24px 20px;
 	}
 }
