@@ -82,9 +82,10 @@ function App() {
 	}, [user, botConfigured])
 
 	// ── Handlers ────────────────────────────────────────────────────────────
-	const handleAuth = (u) => {
+	const handleAuth = async (u) => {
 		setUser(u)
-		setBotConfigured(false)
+		const me = await getMe()
+		setBotConfigured(!!me?.user?.botInstance)
 	}
 
 	const handleLogout = () => {
