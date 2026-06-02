@@ -43,9 +43,14 @@ async function atualizarState(bot: BotRuntime, balance: number): Promise<void> {
 // ─── Calibrar preço de compra ─────────────────────────────────────────────
 
 function calibrarPrecoCompra(bot: BotRuntime): void {
+	// Com posições abertas o nextBuyPrice é fixo relativo à última compra.
+	// A recalibração só faz sentido quando não há posição: evita que o bot
+	// fique esperando um preço que o mercado já deixou para trás.
+	// Após cada venda, atualizarState já recalcula o nextBuyPrice corretamente.
+	if (bot.state.ultimaPosicaoAberta) return
+
 	const precoAtual = bot.getPrice()
-	const precoCompraAtual = bot.state.nextBuyPrice
-	const diferenca = ((precoAtual - precoCompraAtual) / precoAtual) * 100
+	const diferenca = ((precoAtual - bot.state.nextBuyPrice) / precoAtual) * 100
 	if (diferenca > 1) {
 		bot.state.nextBuyPrice = precoAtual * (1 - bot.config.dropPercentage)
 	}
