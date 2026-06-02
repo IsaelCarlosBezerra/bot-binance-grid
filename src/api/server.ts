@@ -9,7 +9,7 @@ export function startApi(port = 3001) {
 	const app = express()
 
 	const allowedOrigins = process.env["CORS_ORIGIN"]
-		? process.env["CORS_ORIGIN"].split(",").map((o) => o.trim())
+		? process.env["CORS_ORIGIN"].split(",").map((o) => o.trim().replace(/\/$/, ""))
 		: ["http://localhost:3005", "http://localhost:3000"]
 
 	app.use(
