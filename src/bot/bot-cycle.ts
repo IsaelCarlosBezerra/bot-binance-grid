@@ -8,11 +8,11 @@ import {
 
 // ─── Helpers de cálculo ────────────────────────────────────────────────────
 
-function calcularPrecoVenda(currentPrice: number, grossTargetPercentage: number): number {
+export function calcularPrecoVenda(currentPrice: number, grossTargetPercentage: number): number {
 	return currentPrice / (1 - grossTargetPercentage)
 }
 
-function calcularNovoPrecoCompra(
+export function calcularNovoPrecoCompra(
 	ultimaOrdem: { buyPrice: number } | undefined,
 	precoAtual: number,
 	dropPercentage: number,

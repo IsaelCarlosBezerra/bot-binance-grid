@@ -3,7 +3,7 @@ import { startApi } from "./api/server.js"
 
 dotenv.config()
 
-// O servidor sobe e os bots dos usuários são iniciados sob demanda via POST /bot/start
-startApi(3001)
+const PORT = parseInt(process.env["PORT"] ?? "3001")
+startApi(PORT)
 
 console.log("🤖 Plataforma de bots iniciada")

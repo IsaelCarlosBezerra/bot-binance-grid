@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "tsx watch src/index.ts",
 		"build": "tsc",
-		"start": "node dist/src/index.js",
+		"postinstall": "prisma generate",
+		"start": "prisma migrate deploy && node dist/src/index.js",
 		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
 		"admin:create": "tsx scripts/create-admin.ts",
 		"kill": "powershell -ExecutionPolicy Bypass -File scripts/kill-dev.ps1",
@@ -24,7 +25,9 @@
 		"@types/mssql": "^9.1.9",
 		"@types/node": "^25.0.10",
 		"concurrently": "^9.2.1",
+		"jest": "^30.4.2",
 		"prisma": "^6.19.2",
+		"ts-jest": "^29.4.11",
 		"ts-node": "^10.9.2",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3"
