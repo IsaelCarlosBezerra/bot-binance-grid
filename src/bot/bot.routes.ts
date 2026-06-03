@@ -1,5 +1,4 @@
 import type { Express, Response } from "express"
-import { PrismaClient } from "@prisma/client"
 import { authMiddleware, type AuthRequest } from "../auth/auth.middleware.js"
 import { botManager } from "./bot-manager.js"
 import { encrypt } from "../auth/crypto.service.js"
@@ -7,8 +6,7 @@ import {
 	getOpenPositions,
 	getClosedPositions,
 } from "../positions/position.store.js"
-
-const prisma = new PrismaClient()
+import prisma from "../lib/prisma.js"
 
 export function registerBotRoutes(app: Express) {
 	// Todas as rotas de bot requerem autenticação

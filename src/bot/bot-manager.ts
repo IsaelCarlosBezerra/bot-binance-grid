@@ -1,10 +1,8 @@
-import { PrismaClient } from "@prisma/client"
 import Binance from "node-binance-api"
 import { BotRuntime, type BotConfig } from "./bot-runtime.js"
 import { decrypt } from "../auth/crypto.service.js"
 import { getUltimaPositionOpen, closePosition, getOpenPositions } from "../positions/position.store.js"
-
-const prisma = new PrismaClient()
+import prisma from "../lib/prisma.js"
 
 class BotManager {
 	private instances: Map<string, BotRuntime> = new Map()

@@ -1,9 +1,7 @@
 import type { Express, Response } from "express"
-import { PrismaClient } from "@prisma/client"
 import { authMiddleware, adminMiddleware, type AuthRequest } from "../auth/auth.middleware.js"
 import { botManager } from "../bot/bot-manager.js"
-
-const prisma = new PrismaClient()
+import prisma from "../lib/prisma.js"
 
 export function registerAdminRoutes(app: Express) {
 	app.use("/admin", authMiddleware, adminMiddleware)

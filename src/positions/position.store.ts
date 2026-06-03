@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client"
 import type { Position, PositionStatus } from "./position.model.js"
-
-const prisma = new PrismaClient()
+import prisma from "../lib/prisma.js"
 
 const PLAN_LIMITS = {
 	FREE: 3,

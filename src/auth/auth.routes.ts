@@ -1,10 +1,8 @@
 import type { Express, Request, Response } from "express"
-import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcryptjs"
 import { signToken } from "./jwt.service.js"
 import { authMiddleware, type AuthRequest } from "./auth.middleware.js"
-
-const prisma = new PrismaClient()
+import prisma from "../lib/prisma.js"
 
 export function registerAuthRoutes(app: Express) {
 	app.post("/auth/register", async (req: Request, res: Response) => {
