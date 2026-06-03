@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+.git
+.env
+*.log
+data
+
+# Frontend é deployado na Vercel — não precisa ir para o Fly.io
+src/ui
