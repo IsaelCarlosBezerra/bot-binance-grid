@@ -1,16 +1,17 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { setupBot, saveConfig } from "../services/api"
 
 export default function SettingsPage({ config, user, onSaved, onClose }) {
 	const [tab, setTab] = useState("bot")
 	const [saving, setSaving] = useState(false)
 	const [message, setMessage] = useState(null)
+	const initializedRef = useRef(false)
 
 	// ── Credenciais Binance ────────────────────────────────────────────────
 	const [keys, setKeys] = useState({
 		binanceApiKey: "",
 		binanceApiSecret: "",
-		testnet: config?.testnet ?? true,
+		testnet: config?.testnet ?? false,
 		symbol: config?.symbol ?? "BTCUSDT",
 	})
 
@@ -24,8 +25,11 @@ export default function SettingsPage({ config, user, onSaved, onClose }) {
 		buyReferenceMode: "LAST_BUY",
 	})
 
+	// Inicializa o formulário apenas uma vez quando config chega.
+	// Ignora atualizações posteriores para não sobrescrever edições do usuário.
 	useEffect(() => {
-		if (!config) return
+		if (!config || initializedRef.current) return
+		initializedRef.current = true
 		setBotForm({
 			buyPercentageOfBalance: config.buyPercentageOfBalance ?? "",
 			targetNetProfit: ((config.targetNetProfit ?? 0) * 100).toFixed(2),
@@ -36,7 +40,7 @@ export default function SettingsPage({ config, user, onSaved, onClose }) {
 		})
 		setKeys((k) => ({
 			...k,
-			testnet: config.testnet ?? true,
+			testnet: config.testnet ?? false,
 			symbol: config.symbol ?? "BTCUSDT",
 		}))
 	}, [config])
