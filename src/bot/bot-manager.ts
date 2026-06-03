@@ -195,6 +195,8 @@ class BotManager {
 		}
 
 		connect()
+		const env = runtime.testnet ? "TESTNET" : "REAL"
+		console.log(`📡 [${runtime.userId}] WebSocket ${symbol} iniciado [${env}]`)
 
 		// Verifica se o preço parou de atualizar e reconecta
 		const intervalId = setInterval(() => {
@@ -213,7 +215,6 @@ class BotManager {
 		}, 30_000)
 
 		this.priceIntervals.set(symbolKey, intervalId)
-		console.log(`📡 [${runtime.userId}] WebSocket ${symbol} iniciado`)
 	}
 }
 

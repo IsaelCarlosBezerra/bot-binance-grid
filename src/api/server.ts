@@ -18,6 +18,8 @@ export function startApi(port = 3001) {
 	const uiPath = path.resolve(process.cwd(), "src/ui")
 	app.use(express.static(uiPath))
 
+	app.get("/healthz", (_req, res) => res.json({ ok: true }))
+
 	registerAuthRoutes(app)
 	registerBotRoutes(app)
 	registerAdminRoutes(app)

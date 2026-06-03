@@ -25,6 +25,7 @@ export class BotRuntime {
 	readonly instanceId: string
 	readonly userId: string
 	readonly plan: "FREE" | "PRO"
+	readonly testnet: boolean
 	config: BotConfig
 	state: BotState
 	client: ReturnType<typeof Binance.prototype.options>
@@ -54,6 +55,8 @@ export class BotRuntime {
 			ultimaPosicaoAberta: undefined,
 			balance: 0,
 		}
+
+		this.testnet = params.testnet
 
 		const options: Record<string, unknown> = {
 			APIKEY: params.apiKey,
