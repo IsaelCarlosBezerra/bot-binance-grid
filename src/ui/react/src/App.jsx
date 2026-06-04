@@ -48,6 +48,7 @@ function App() {
 
 	// ── Polling do dashboard ────────────────────────────────────────────────
 	const intervalRef = useRef(null)
+	const failCountRef = useRef(0)
 
 	const fetchAll = async () => {
 		if (document.visibilityState === "hidden") return
@@ -55,12 +56,16 @@ function App() {
 		const status = await loadStatus()
 
 		if (!status) {
-			// servidor offline — encerra tudo
-			clearInterval(intervalRef.current)
-			intervalRef.current = null
+			failCountRef.current += 1
+			// Só para o polling após 5 falhas consecutivas (servidor realmente offline)
+			if (failCountRef.current >= 5) {
+				clearInterval(intervalRef.current)
+				intervalRef.current = null
+			}
 			return
 		}
 
+		failCountRef.current = 0
 		setData(status)
 		const sum = await loadSummary()
 		if (sum?.summary) {

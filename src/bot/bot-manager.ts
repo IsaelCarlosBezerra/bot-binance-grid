@@ -201,7 +201,7 @@ class BotManager {
 		// Verifica se o preço parou de atualizar e reconecta
 		const intervalId = setInterval(() => {
 			const lastUpdate = runtime.getLastPriceUpdate()
-			if (lastUpdate && Date.now() - lastUpdate > 30_000) {
+			if (lastUpdate && Date.now() - lastUpdate > 15_000) {
 				console.log(`🔄 [${runtime.userId}] WebSocket sem atualização — reconectando...`)
 				const oldEndpoint = this.wsEndpoints.get(symbolKey)
 				if (oldEndpoint) {
@@ -212,7 +212,7 @@ class BotManager {
 				connect()
 				this.symbolClients.set(symbolKey, client)
 			}
-		}, 30_000)
+		}, 15_000)
 
 		this.priceIntervals.set(symbolKey, intervalId)
 	}
