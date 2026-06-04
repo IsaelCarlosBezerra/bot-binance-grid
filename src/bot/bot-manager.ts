@@ -176,13 +176,13 @@ class BotManager {
 
 		const connect = () => {
 			try {
-				const endpoint = client.websockets.miniTicker(
-					(ticker: Record<string, { close: string }>) => {
-						if (ticker[symbol]) {
-							const price = Number(ticker[symbol]!.close)
-							if (!Number.isNaN(price)) {
-								runtime.updatePrice(price)
-							}
+				const endpoint = client.websockets.prevDay(
+					symbol,
+					(err: Error | null, data: { close: string }) => {
+						if (err) return
+						const price = Number(data.close)
+						if (!Number.isNaN(price) && price > 0) {
+							runtime.updatePrice(price)
 						}
 					},
 				)
