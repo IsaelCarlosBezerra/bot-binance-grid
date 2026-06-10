@@ -51,7 +51,7 @@ export function registerBotRoutes(app: Express) {
 	// ── Status do bot ─────────────────────────────────────────────────────
 	app.get("/bot/status", async (req: AuthRequest, res: Response) => {
 		const userId = req.user!.userId
-		const runtime = botManager.get(userId)
+		let runtime = botManager.get(userId)
 
 		const dbInstance = await prisma.botInstance.findUnique({
 			where: { userId },
@@ -66,6 +66,14 @@ export function registerBotRoutes(app: Express) {
 		if (!dbInstance) {
 			res.status(404).json({ error: "Bot não configurado. Use POST /bot/setup primeiro." })
 			return
+		}
+
+		if (!runtime) {
+			try {
+				runtime = await botManager.loadAndStart(userId)
+			} catch {
+				runtime = undefined
+			}
 		}
 
 		const openPositions = runtime
