@@ -1,3 +1,42 @@
+function fmt(n) {
+	return (n ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+function PositionCard({ pos }) {
+	const invested = pos.buyPrice * pos.quantity
+	const profit = (pos.sellPrice - pos.buyPrice) * pos.quantity
+
+	return (
+		<div className="position-mobile-card">
+			<div className="position-mobile-top">
+				<span className="status-badge">OPEN</span>
+				<span className={`position-mobile-profit ${profit >= 0 ? "positive" : "negative"}`}>
+					{profit >= 0 ? "+" : ""}{fmt(profit)}
+				</span>
+			</div>
+
+			<div className="position-mobile-grid">
+				<div>
+					<span className="position-mobile-label">Compra</span>
+					<span className="position-mobile-value">{fmt(pos.buyPrice)}</span>
+				</div>
+				<div>
+					<span className="position-mobile-label">Alvo</span>
+					<span className="position-mobile-value">{fmt(pos.sellPrice)}</span>
+				</div>
+				<div>
+					<span className="position-mobile-label">Qtd</span>
+					<span className="position-mobile-value">{pos.quantity}</span>
+				</div>
+				<div>
+					<span className="position-mobile-label">Investido</span>
+					<span className="position-mobile-value">{fmt(invested)} USDT</span>
+				</div>
+			</div>
+		</div>
+	)
+}
+
 export default function OpenPositions({ positions }) {
 	if (!positions || positions.length === 0) {
 		return (
@@ -11,7 +50,8 @@ export default function OpenPositions({ positions }) {
 	return (
 		<div className="card">
 			<div className="card-title">Posições Abertas · {positions.length}</div>
-			<div className="table-wrap">
+
+			<div className="table-wrap positions-table">
 				<table>
 					<thead>
 						<tr>
@@ -24,26 +64,32 @@ export default function OpenPositions({ positions }) {
 						</tr>
 					</thead>
 					<tbody>
-						{positions.map((pos, i) => {
+						{positions.map((pos) => {
 							const invested = pos.buyPrice * pos.quantity
 							const profit = (pos.sellPrice - pos.buyPrice) * pos.quantity
 							return (
-								<tr key={i}>
+								<tr key={pos.id}>
 									<td>
 										<span className="status-badge">OPEN</span>
 									</td>
-									<td>{pos.buyPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td>
-									<td>{pos.sellPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td>
+									<td>{fmt(pos.buyPrice)}</td>
+									<td>{fmt(pos.sellPrice)}</td>
 									<td>{pos.quantity}</td>
-									<td>{invested.toFixed(2)}</td>
+									<td>{fmt(invested)}</td>
 									<td className={profit >= 0 ? "positive" : "negative"}>
-										{profit >= 0 ? "+" : ""}{profit.toFixed(2)}
+										{profit >= 0 ? "+" : ""}{fmt(profit)}
 									</td>
 								</tr>
 							)
 						})}
 					</tbody>
 				</table>
+			</div>
+
+			<div className="positions-mobile-list">
+				{positions.map((pos) => (
+					<PositionCard key={pos.id} pos={pos} />
+				))}
 			</div>
 		</div>
 	)

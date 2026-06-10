@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import Header from "./components/Header"
 import FinancialSummary from "./components/FinancialSummary"
+import WalletSummary from "./components/WalletSummary"
 import MarketState from "./components/MarketState"
 import OpenPositions from "./components/OpenPositions"
 import LoginPage from "./components/LoginPage"
@@ -118,6 +119,11 @@ function App() {
 			description: "Resultados, carteira e taxas",
 		},
 		{
+			id: "wallet",
+			title: "Carteira",
+			description: "Saldo, alocação e movimento",
+		},
+		{
 			id: "positions",
 			title: "Posições",
 			description: "Ordens abertas no bot",
@@ -157,7 +163,7 @@ function App() {
 			)}
 
 			<div className="container dashboard-shell">
-				<div className="screen-nav">
+				<div className="screen-nav desktop-nav">
 					{screens.map((screen) => (
 						<button
 							key={screen.id}
@@ -204,6 +210,13 @@ function App() {
 					{activeScreen === "finance" && (
 						<FinancialSummary
 							summary={summary}
+							summaryPrevisto={summaryOpen}
+						/>
+					)}
+
+					{activeScreen === "wallet" && (
+						<WalletSummary
+							summary={summary}
 							balance={balance}
 							alocado={alocado}
 							summaryPrevisto={summaryOpen}
@@ -214,6 +227,20 @@ function App() {
 						<OpenPositions positions={openPositions} />
 					)}
 				</div>
+
+				<nav className="mobile-nav" aria-label="Navegação principal">
+					{screens.map((screen) => (
+						<button
+							key={screen.id}
+							type="button"
+							className={`mobile-nav-item ${activeScreen === screen.id ? "active" : ""}`}
+							onClick={() => setActiveScreen(screen.id)}
+						>
+							<span className="mobile-nav-title">{screen.title}</span>
+							<span className="mobile-nav-desc">{screen.description}</span>
+						</button>
+					))}
+				</nav>
 			</div>
 		</>
 	)
