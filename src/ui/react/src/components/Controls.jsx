@@ -1,15 +1,13 @@
-"use client"
-
 import { useState } from "react"
 import { buy } from "../services/api"
 
-export default function Controls({ onStart, onStop, price }) {
+export default function Controls({ onStart, onStop, price, symbol = "BTCUSDT" }) {
 	const [valor, setValor] = useState(0)
 	const [qtd, setQtd] = useState("")
 
-	const comprar = async (symbol, qtd) => {
-		if (confirm(`Confirma compra de ${qtd} BTC por ${valor.toFixed(2)} USDT?`)) {
-			const success = await buy({ symbol, qtd })
+	const comprar = async (tradeSymbol, tradeQtd) => {
+		if (confirm(`Confirma compra de ${tradeQtd} ${tradeSymbol} por ${valor.toFixed(2)} USDT?`)) {
+			const success = await buy({ symbol: tradeSymbol, qtd: tradeQtd })
 			if (!success) alert("Erro ao executar compra")
 		}
 	}
@@ -31,7 +29,7 @@ export default function Controls({ onStart, onStop, price }) {
 				<button className="stop" onClick={onStop}>⏸ Pausar</button>
 			</div>
 			<div className="controlsbuy">
-				<span className="controlsbuy-label">BTCUSDT</span>
+				<span className="controlsbuy-label">{symbol}</span>
 				<span className="controlsbuy-label">{valor.toFixed(2)} USDT</span>
 				<input
 					type="number"
@@ -42,7 +40,7 @@ export default function Controls({ onStart, onStop, price }) {
 				/>
 				<button
 					disabled={!(Number(qtd) > 0)}
-					onClick={() => comprar("BTCUSDT", qtd)}
+					onClick={() => comprar(symbol, qtd)}
 					className="comprar"
 				>
 					Comprar

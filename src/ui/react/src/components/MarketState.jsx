@@ -1,12 +1,24 @@
-export default function MarketState({ strategy }) {
+import StatusIndicator from "./StatusIndicator"
+import Controls from "./Controls"
+
+export default function MarketState({ strategy, enabled, onStart, onStop, price, symbol }) {
 	const { currentPrice, nextBuyPrice, nextSellPrice } = strategy ?? {}
+	const marketSymbol = symbol ?? "BTCUSDT"
 
 	return (
-		<div className="card">
+		<div className="card market-card">
 			<div className="card-title">Mercado</div>
 
+			<div className="market-header">
+				<div>
+					<div className="market-symbol">{marketSymbol}</div>
+					<div className="market-subtitle">Preço atual, pontos de grid e ação do bot</div>
+				</div>
+				<StatusIndicator enabled={enabled} />
+			</div>
+
 			<div className="price-display">
-				<div className="price-symbol">BTCUSDT</div>
+				<div className="price-symbol">{marketSymbol}</div>
 				<div className="price-current">
 					{currentPrice ? currentPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"}
 				</div>
@@ -29,6 +41,15 @@ export default function MarketState({ strategy }) {
 					}
 				</div>
 			</div>
+
+			<div className="divider" />
+
+			<Controls
+				onStart={onStart}
+				onStop={onStop}
+				price={price}
+				symbol={marketSymbol}
+			/>
 		</div>
 	)
 }

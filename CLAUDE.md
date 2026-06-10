@@ -1,187 +1,367 @@
-# Bot Binance Grid — Documentação do Projeto
+# Bot Binance Grid - Fonte da Verdade
+
+Documento de referência do projeto. Se houver divergência entre este arquivo e outros textos antigos, vale o comportamento do código atual.
 
 ## O que é
 
-Plataforma SaaS de bot de grid trading para Binance. Cada usuário cadastrado opera seu próprio bot de forma independente, usando sua própria conta Binance.
+Plataforma SaaS de bot de grid trading para Binance. Cada usuário cadastrado opera uma instância própria do bot, usando as suas próprias chaves da Binance.
 
----
+## Stack atual
 
-## Stack
+- Backend: Node.js + TypeScript em ESM
+- API: Express 5
+- Banco: PostgreSQL com Prisma 6
+- Autenticação: JWT (`jsonwebtoken`) e `bcryptjs`
+- Criptografia: AES-256-GCM com `crypto` nativo do Node
+- Integração com Binance: `node-binance-api`
+- Frontend: React 18 + Vite em `src/ui/react`
 
-- **Backend:** Node.js + TypeScript (ESM strict) + Express 5
-- **Banco:** PostgreSQL + Prisma 6
-- **Auth:** JWT (jsonwebtoken) + bcryptjs
-- **Criptografia:** AES-256-GCM (crypto nativo do Node)
-- **Binance:** node-binance-api (WebSocket + REST)
-- **Frontend:** React 18 + Vite (porta 3005)
-- **Backend porta:** 3001
+## Portas e execução local
 
----
+- Backend: `3001`
+- Frontend em desenvolvimento: `3005`
+- Healthcheck: `GET /healthz`
+
+O backend também serve arquivos estáticos de `src/ui` quando existe build pronto.
 
 ## Modelo de negócio
 
-- SaaS com planos **FREE** e **PRO**
-- Cada usuário usa sua **própria conta Binance** (chaves dele, não da plataforma)
-- Pagamento: sem integração por enquanto (gerenciado manualmente via rotas admin)
+- Produto SaaS com planos `FREE` e `PRO`
+- Cada usuário usa sua própria conta Binance
+- Não existe integração automática de cobrança neste momento
+- A administração de planos e acesso é feita por rotas administrativas
 
-### Limites por plano
-| Plano | Posições abertas simultâneas |
-|-------|------------------------------|
-| FREE  | máx 3                        |
-| PRO   | ilimitado                    |
+### Limite de posições abertas por plano
 
----
+- `FREE`: no máximo 3 posições abertas ao mesmo tempo
+- `PRO`: sem limite aplicado pelo sistema
 
-## Variáveis de ambiente (`.env`)
+## Variáveis de ambiente
+
+Arquivo base: `.env.example`
 
 ```env
-DATABASE_URL=postgresql://usuario:senha@localhost:5432/bot-binance-grid?schema=public
-JWT_SECRET=<segredo longo e aleatório — assina todos os tokens JWT da plataforma>
-ENCRYPTION_SECRET=<segredo longo e aleatório — chave-mestra para criptografar API Keys dos usuários>
+DATABASE_URL=postgresql://usuario:senha@host:5432/banco?schema=public
+JWT_SECRET=segredo-longo-e-aleatorio
+ENCRYPTION_SECRET=outro-segredo-longo-e-aleatorio
+CORS_ORIGIN=https://seu-app.vercel.app
+PORT=3001
 ```
 
-### O que cada variável faz
+### Papel de cada variável
 
-| Variável | Escopo | Função |
-|----------|--------|--------|
-| `JWT_SECRET` | Servidor (global) | Assina e verifica tokens JWT de todos os usuários |
-| `ENCRYPTION_SECRET` | Servidor (global) | Chave-mestra AES-256-GCM para criptografar/descriptografar as API Keys da Binance de cada usuário |
+- `DATABASE_URL`: conexão com o PostgreSQL
+- `JWT_SECRET`: assina e valida todos os JWTs
+- `ENCRYPTION_SECRET`: chave mestra para criptografar as credenciais Binance
+- `CORS_ORIGIN`: lista de origens permitidas, separadas por vírgula
+- `PORT`: porta da API
 
-**Essas variáveis NÃO são por usuário.** São segredos do servidor configurados uma vez no deploy.
+### Observações importantes
 
-### O que É por usuário
+- `JWT_SECRET` e `ENCRYPTION_SECRET` são segredos do servidor, não por usuário
+- As chaves da Binance são sempre armazenadas criptografadas no banco
+- O fallback interno do código existe para desenvolvimento, mas não deve ser usado em produção
 
-Cada usuário tem na tabela `bot_instances`:
-- `binanceApiKey` — chave da Binance **criptografada** com `ENCRYPTION_SECRET`
-- `binanceApiSecret` — secret da Binance **criptografado** com `ENCRYPTION_SECRET`
+## Modelo de dados
 
-Fluxo: usuário informa as chaves → `encrypt(apiKey, ENCRYPTION_SECRET)` → salvo no banco → ao iniciar o bot, `decrypt(apiKey, ENCRYPTION_SECRET)` → usado na Binance.
+### `User`
 
----
-
-## Modelos de dados (Prisma)
-
-```
-User (1) ──── (1) BotInstance (1) ──── (N) TradeOrder
-```
-
-### User
-- `id`, `email`, `passwordHash`, `name`
+- `id`
+- `email`
+- `passwordHash`
+- `name`
 - `plan`: `FREE` | `PRO`
 - `role`: `USER` | `ADMIN`
+- `createdAt`
+- `updatedAt`
 
-### BotInstance
-- `userId` (FK → User)
-- `binanceApiKey` / `binanceApiSecret` — **criptografados**
-- `testnet: boolean`
-- `symbol`, `enabled`, `cycleIntervalMs`
-- `buyPercentageOfBalance`, `targetNetProfit`, `grossTargetPercentage`
-- `dropPercentage`, `buyReferenceMode`
+### `BotInstance`
 
-### TradeOrder
-- `botInstanceId` (FK → BotInstance)
-- `symbol`, `buyPrice`, `quantity`, `sellPrice`
-- `expectedNetProfit`, `status` (`OPEN` | `CLOSED`)
-- `createdAt: BigInt`
+- `id`
+- `userId` único
+- `binanceApiKey` criptografada
+- `binanceApiSecret` criptografada
+- `testnet`
+- `symbol`
+- `enabled`
+- `cycleIntervalMs`
+- `buyPercentageOfBalance`
+- `targetNetProfit`
+- `grossTargetPercentage`
+- `dropPercentage`
+- `buyReferenceMode`
+- `createdAt`
+- `updatedAt`
 
----
+### `TradeOrder`
 
-## Arquitetura multi-tenant
+- `id`
+- `botInstanceId`
+- `symbol`
+- `buyPrice`
+- `quantity`
+- `sellPrice`
+- `expectedNetProfit`
+- `status`: `OPEN` | `CLOSED`
+- `createdAt` em `BigInt`
 
+## Relação entre entidades
+
+```text
+User 1 ── 1 BotInstance 1 ── N TradeOrder
 ```
-BotManager (singleton)
-  └── Map<userId, BotRuntime>
-        ├── BotRuntime.client     — instância Binance com as chaves do usuário
-        ├── BotRuntime.state      — strategyState isolado por usuário
-        ├── BotRuntime.config     — config do bot por usuário
-        └── BotRuntime._loop()   — ciclo de decisão independente
-```
 
-- Cada usuário tem um `BotRuntime` completamente isolado
-- WebSocket de preço por instância (via `client.websockets.miniTicker`)
-- Ciclo de decisão a cada `cycleIntervalMs` ms (padrão: 5000ms)
+Cada usuário possui no máximo uma instância de bot. A instância guarda a configuração e as credenciais criptografadas. As ordens de trade ficam vinculadas a essa instância.
 
----
+## Autenticação e autorização
+
+- Login e cadastro retornam JWT com validade de `7d`
+- O middleware de autenticação exige `Authorization: Bearer <token>`
+- O middleware de admin exige `role = ADMIN`
+
+### Payload do JWT
+
+- `userId`
+- `email`
+- `plan`
+- `role`
 
 ## Rotas da API
 
-### Auth (públicas)
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/auth/register` | Cadastro (plano FREE por padrão) |
-| POST | `/auth/login` | Login → retorna JWT |
-| GET | `/auth/me` | Dados do usuário logado |
+### Públicas
 
-### Bot (requer JWT)
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/bot/setup` | Configura API Keys Binance + parâmetros do bot |
-| GET | `/bot/status` | Status completo (config, posições, estado) |
-| POST | `/bot/start` | Inicia o ciclo de trading |
-| POST | `/bot/stop` | Para o ciclo |
-| PATCH | `/bot/config` | Atualiza parâmetros (sem mexer nas API Keys) |
-| GET | `/bot/positions` | Posições abertas e fechadas |
-| GET | `/bot/summary` | Resumo financeiro (lucro, IR, taxas) |
-| GET | `/bot/price` | Preço atual do symbol (só com bot ativo) |
-| POST | `/bot/buy` | Compra manual |
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /auth/me` com JWT
 
-### Admin (requer JWT + role ADMIN)
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/admin/users` | Lista todos os usuários |
-| GET | `/admin/users/:id` | Detalhe de um usuário |
-| PATCH | `/admin/users/:id/plan` | Promove FREE → PRO ou rebaixa |
-| PATCH | `/admin/users/:id/role` | Altera USER ↔ ADMIN |
-| POST | `/admin/users/:id/bot/stop` | Para o bot de um usuário forçadamente |
-| GET | `/admin/stats` | Totais: usuários, planos, ordens |
+### Bot, com JWT
 
----
+- `POST /bot/setup`
+- `GET /bot/status`
+- `POST /bot/start`
+- `POST /bot/stop`
+- `PATCH /bot/config`
+- `GET /bot/positions`
+- `GET /bot/summary`
+- `GET /bot/balance`
+- `GET /bot/price`
+- `POST /bot/buy`
 
-## Comandos
+### Admin, com JWT e role `ADMIN`
+
+- `GET /admin/users`
+- `GET /admin/users/:id`
+- `PATCH /admin/users/:id/plan`
+- `PATCH /admin/users/:id/role`
+- `POST /admin/users/:id/bot/stop`
+- `GET /admin/stats`
+
+## Fluxo de autenticação
+
+### Cadastro
+
+1. Valida `email`, `password` e `name`
+2. Exige senha com no mínimo 8 caracteres
+3. Bloqueia e-mail já cadastrado
+4. Cria o usuário com `plan = FREE` e `role = USER`
+5. Gera JWT e retorna o usuário público
+
+### Login
+
+1. Busca usuário por e-mail
+2. Valida a senha com `bcrypt`
+3. Gera JWT e retorna o usuário público
+
+### `/auth/me`
+
+Retorna o usuário logado e um resumo da `botInstance`, se existir.
+
+## Configuração do bot
+
+### `POST /bot/setup`
+
+- Cria ou atualiza a `BotInstance` do usuário
+- Exige `binanceApiKey` e `binanceApiSecret`
+- Criptografa as credenciais com `ENCRYPTION_SECRET`
+- Salva os parâmetros de operação
+- Remove a instância em memória para forçar recarga do runtime com a nova configuração
+
+### `PATCH /bot/config`
+
+- Atualiza apenas campos permitidos de configuração
+- Não altera as chaves da Binance
+- Se o runtime estiver em memória, atualiza também a configuração ativa
+
+## Ciclo do bot
+
+### Como o runtime funciona
+
+Cada usuário tem um `BotRuntime` isolado com:
+
+- cliente Binance próprio
+- estado próprio
+- configuração própria
+- loop de decisão independente
+
+### Inicialização
+
+Quando o bot é carregado:
+
+1. As chaves são descriptografadas
+2. O cliente Binance é criado
+3. O preço é assinado por WebSocket
+4. O estado é reconstruído a partir do banco
+5. Posições pendentes que já atingiram o preço de venda podem ser liquidadas no restart
+
+### WebSocket de preço
+
+- O bot usa stream de preço por símbolo
+- Se o preço parar de atualizar por mais de 15 segundos, o WebSocket é reconectado
+- Se o runtime estiver parado e for reativado, o preço volta a ser assinado
+
+### Loop principal
+
+O ciclo executa a cada `cycleIntervalMs` milissegundos:
+
+1. Calibra o próximo preço de compra quando não há posição aberta
+2. Tenta vender primeiro
+3. Se não vendeu, tenta comprar
+
+## Estratégia de trading
+
+### Venda
+
+O bot vende quando:
+
+- existe uma posição aberta
+- `precoAtual >= nextSellPrice`
+
+Depois da venda:
+
+- a posição é marcada como `CLOSED`
+- o estado é recalculado
+- o saldo em memória é ajustado
+
+### Compra
+
+O bot compra quando:
+
+- não há venda pendente
+- `precoAtual` está abaixo do `nextBuyPrice`
+
+Regras da compra:
+
+- usa `buyPercentageOfBalance` do saldo livre em USDT
+- ajusta a quantidade aos filtros da Binance
+- valida `minQty` e `minNotional`
+- faz `marketBuy`
+- cria a posição com preço de venda calculado por `grossTargetPercentage`
+
+### Recalibração de compra
+
+Se não houver posição aberta e o mercado tiver se afastado mais de 1% do `nextBuyPrice`, o bot recalibra o preço de compra para não ficar preso a um nível antigo.
+
+## Fórmulas principais
+
+- Preço de venda bruto:
+
+```text
+sellPrice = currentPrice / (1 - grossTargetPercentage)
+```
+
+- Próximo preço de compra:
+
+```text
+nextBuyPrice = currentPrice * (1 - dropPercentage)
+```
+
+- Lucro líquido estimado:
+
+```text
+lucroLiquido = vendasValor - comprasValor - taxas - IR
+```
+
+## Cálculo financeiro
+
+- Taxa Binance considerada: `0,1%` por operação
+- IR considerado: `15%` sobre lucro bruto positivo
+- Os relatórios de resumo calculam:
+  - compras
+  - vendas
+  - lucro líquido
+  - taxas totais
+  - IR total
+
+## Posições
+
+- `addPosition` respeita o limite do plano
+- `closePosition` marca a ordem como fechada
+- `getOpenPositions` retorna abertas ordenadas por `buyPrice` desc
+- `getClosedPositions` retorna fechadas por `createdAt` asc
+- `getUltimaPositionOpen` pega a última posição aberta da lista aberta
+
+## Compra manual
+
+`POST /bot/buy`:
+
+1. Exige bot ativo e preço disponível
+2. Recebe `symbol` e `qtd`
+3. Valida os filtros da Binance
+4. Verifica saldo livre em USDT
+5. Executa `marketBuy`
+6. Registra a posição com preço de venda calculado
+
+## Administração
+
+### Funções disponíveis
+
+- listar usuários
+- ver detalhes de um usuário
+- promover ou rebaixar plano
+- alterar role entre `USER` e `ADMIN`
+- parar bot de um usuário forçadamente
+- ver estatísticas gerais
+
+### Efeito das ações admin
+
+- Alterar plano atualiza também o runtime em memória, se ele existir
+- Parar bot força `enabled = false` no banco
+
+## Comandos úteis
 
 ```bash
-# Desenvolvimento (backend + frontend juntos)
 npm run dev:all
-
-# Só backend
 npm run dev
-
-# Só frontend
 cd src/ui/react && npm run dev
-
-# Criar primeiro admin
+npm run build
+npm run test
 npm run admin:create <email> <senha> [nome]
-
-# Migrations
 npx prisma migrate dev
 npx prisma generate
 ```
 
-## SSL local (problema de certificado no Windows)
-```bash
-# Para instalar pacotes npm
-npm install <pacote> --strict-ssl=false
+## Deploy
 
-# Para prisma generate/migrate
-$env:NODE_TLS_REJECT_UNAUTHORIZED="0"; npx prisma generate
-```
+- `npm run start` executa `prisma migrate deploy` antes de subir a aplicação compilada
+- O build espera que o TypeScript gere saída em `dist`
+- O CORS precisa incluir a origem do frontend publicado
 
----
+## Invariantes importantes
 
-## Estratégia de trading (grid)
+- Cada usuário tem uma única `BotInstance`
+- Credenciais Binance nunca são salvas em texto puro
+- O runtime usa o plano do usuário para respeitar limites de posição
+- `FREE` nunca deve abrir mais de 3 posições simultâneas
+- O bot sempre tenta vender antes de comprar no ciclo
+- Mudança de configuração deve reidratar o runtime para evitar estado antigo
 
-1. Bot inicia WebSocket e aguarda primeiro preço
-2. A cada `cycleIntervalMs`:
-   - Se `precoAtual >= nextSellPrice` → vende a posição mais antiga (FIFO)
-   - Se `precoAtual <= nextBuyPrice` → compra usando `buyPercentageOfBalance` do saldo livre
-3. `nextBuyPrice` = preço atual × (1 - `dropPercentage`)
-4. `nextSellPrice` = preço de compra / (1 - `grossTargetPercentage`)
-5. Se preço subiu >1% sem compra, recalibra `nextBuyPrice`
+## O que ainda não existe
 
----
+- Cobrança automática
+- Integração de pagamento
+- Múltiplas instâncias de bot por usuário
+- Estratégias além do grid atual
 
-## Cálculo financeiro
+## Nota final
 
-- Taxa Binance: 0,1% por operação (compra + venda)
-- IR: 15% sobre lucro bruto por operação
-- `lucroLiquido = vendasValor - comprasValor - taxas - IR`
+Se for mexer em estratégia, persistência ou autenticação, este arquivo deve ser atualizado junto com o código. Ele existe para evitar documentação “quase certa” e manter a operação do projeto alinhada com o que realmente roda.

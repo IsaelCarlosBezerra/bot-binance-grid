@@ -28,10 +28,17 @@
 
 body {
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-	background: var(--bg-base);
+	background:
+		radial-gradient(circle at top left, rgba(59,130,246,0.14), transparent 34%),
+		radial-gradient(circle at 80% 10%, rgba(16,185,129,0.08), transparent 26%),
+		linear-gradient(180deg, #06090f 0%, #05070c 100%);
 	color: var(--text-2);
 	line-height: 1.5;
 	-webkit-font-smoothing: antialiased;
+}
+
+#root {
+	min-height: 100vh;
 }
 
 /* ── Header ────────────────────────────────────────────────────────────── */
@@ -263,6 +270,158 @@ body {
 	margin: 0 auto;
 }
 
+.dashboard-shell {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	padding-bottom: 32px;
+}
+
+.screen-nav {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 14px;
+}
+
+.screen-card {
+	text-align: left;
+	padding: 18px;
+	border-radius: var(--radius-lg);
+	border: 1px solid var(--border);
+	background:
+		linear-gradient(180deg, rgba(17,24,39,0.96), rgba(12,17,32,0.92)),
+		var(--bg-surface);
+	box-shadow: var(--shadow-card);
+	color: var(--text-1);
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+	cursor: pointer;
+	min-height: 128px;
+}
+
+.screen-card:hover {
+	transform: translateY(-2px);
+	border-color: var(--border-accent);
+	background:
+		linear-gradient(180deg, rgba(17,24,39,1), rgba(14,20,36,0.96)),
+		var(--bg-surface);
+}
+
+.screen-card.active {
+	border-color: rgba(59,130,246,0.45);
+	box-shadow: 0 0 0 1px rgba(59,130,246,0.15), var(--shadow-card), var(--shadow-accent);
+}
+
+.screen-card-kicker {
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.8px;
+	color: var(--text-3);
+}
+
+.screen-card-title {
+	font-size: 18px;
+	font-weight: 700;
+	letter-spacing: -0.4px;
+}
+
+.screen-card-description {
+	font-size: 13px;
+	color: var(--text-2);
+	max-width: 28ch;
+}
+
+.screen-panel {
+	background: rgba(12,17,32,0.78);
+	border: 1px solid var(--border);
+	border-radius: calc(var(--radius-lg) + 4px);
+	padding: 22px;
+	box-shadow: var(--shadow-card);
+	backdrop-filter: blur(10px);
+}
+
+.screen-panel-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 18px;
+}
+
+.screen-panel-header h2 {
+	font-size: 1.3rem;
+	font-weight: 700;
+	color: var(--text-1);
+	letter-spacing: -0.4px;
+	margin-top: 2px;
+}
+
+.screen-panel-kicker {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	color: var(--text-3);
+	margin-bottom: 4px;
+}
+
+.ghost-link {
+	background: transparent;
+	border: 1px solid var(--border);
+	color: var(--text-2);
+	padding: 10px 14px;
+	border-radius: var(--radius-sm);
+	min-height: 42px;
+	transition: all 0.15s ease;
+}
+
+.ghost-link:hover:not(:disabled) {
+	background: var(--bg-hover);
+	color: var(--text-1);
+	border-color: var(--border-accent);
+}
+
+.ghost-link:disabled {
+	opacity: 0.45;
+	cursor: default;
+}
+
+.screen-stack {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.screen-shortcuts {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
+}
+
+.shortcut-card {
+	text-align: left;
+	border-radius: var(--radius-lg);
+	border: 1px solid var(--border);
+	background: linear-gradient(180deg, rgba(17,24,39,0.9), rgba(10,14,24,0.92));
+	color: var(--text-1);
+	padding: 18px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	box-shadow: var(--shadow-card);
+}
+
+.shortcut-card-title {
+	font-size: 16px;
+	font-weight: 700;
+}
+
+.shortcut-card-description {
+	font-size: 13px;
+	color: var(--text-2);
+}
+
 /* ── Status ─────────────────────────────────────────────────────────────── */
 .status {
 	display: flex;
@@ -389,6 +548,18 @@ button {
 	min-width: 0;
 }
 
+.market-card {
+	background:
+		radial-gradient(circle at top right, rgba(59,130,246,0.08), transparent 36%),
+		linear-gradient(180deg, rgba(12,17,32,0.98), rgba(12,17,32,0.92));
+}
+
+.finance-card {
+	background:
+		radial-gradient(circle at top right, rgba(245,158,11,0.08), transparent 32%),
+		linear-gradient(180deg, rgba(12,17,32,0.98), rgba(12,17,32,0.92));
+}
+
 .card-title {
 	font-size: 11px;
 	font-weight: 600;
@@ -451,6 +622,54 @@ button {
 	height: 1px;
 	background: var(--border);
 	margin: 16px 0;
+}
+
+.market-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 6px;
+}
+
+.market-symbol {
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--text-1);
+	letter-spacing: -0.3px;
+}
+
+.market-subtitle {
+	font-size: 13px;
+	color: var(--text-3);
+	margin-top: 2px;
+}
+
+.finance-section {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.finance-section + .finance-section {
+	margin-top: 18px;
+}
+
+.finance-section-header h3 {
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.7px;
+	text-transform: uppercase;
+	color: var(--text-3);
+}
+
+.finance-results-grid,
+.finance-wallet-grid {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.finance-details {
+	margin-top: 18px;
 }
 
 .stat-row {
@@ -711,6 +930,10 @@ tbody tr:hover td { background: var(--bg-hover); }
 /* ── Responsivo ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
 	.cards { grid-template-columns: 1fr; gap: 16px; }
+	.screen-nav { grid-template-columns: 1fr; }
+	.screen-shortcuts { grid-template-columns: 1fr; }
+	.finance-results-grid,
+	.finance-wallet-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
@@ -719,6 +942,12 @@ tbody tr:hover td { background: var(--bg-hover); }
 	.header-email { display: none; }
 
 	.container { padding: 14px; }
+	.screen-panel { padding: 16px; }
+	.screen-panel-header {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.screen-panel-header h2 { font-size: 1.15rem; }
 
 	.controls { flex-direction: column; align-items: stretch; }
 	.controls-actions .start,
@@ -733,4 +962,5 @@ tbody tr:hover td { background: var(--bg-hover); }
 
 	.price-current { font-size: 1.8rem; }
 	.metrics-grid  { grid-template-columns: 1fr 1fr; }
+	.market-header { align-items: flex-start; flex-direction: column; }
 }

@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from "react"
 import Header from "./components/Header"
-import StatusIndicator from "./components/StatusIndicator"
-import Controls from "./components/Controls"
 import FinancialSummary from "./components/FinancialSummary"
 import MarketState from "./components/MarketState"
 import OpenPositions from "./components/OpenPositions"
@@ -23,6 +21,7 @@ function App() {
 	const [authLoading, setAuthLoading] = useState(true)
 	const [botConfigured, setBotConfigured] = useState(false)
 	const [showSettings, setShowSettings] = useState(false)
+	const [activeScreen, setActiveScreen] = useState("home")
 
 	const [data, setData] = useState(null)
 	const [summary, setSummary] = useState(null)
@@ -45,6 +44,10 @@ function App() {
 			})
 			.finally(() => setAuthLoading(false))
 	}, [])
+
+	useEffect(() => {
+		window.scrollTo({ top: 0, behavior: "smooth" })
+	}, [activeScreen])
 
 	// ── Polling do dashboard ────────────────────────────────────────────────
 	const intervalRef = useRef(null)
@@ -97,10 +100,29 @@ function App() {
 		clearToken()
 		setUser(null)
 		setData(null)
+		setActiveScreen("home")
 	}
 
 	const handleStart = async () => { await startBot(); fetchAll() }
 	const handleStop = async () => { await stopBot(); fetchAll() }
+
+	const screens = [
+		{
+			id: "home",
+			title: "Mercado",
+			description: "Preço, status do bot e ações rápidas",
+		},
+		{
+			id: "finance",
+			title: "Financeiro",
+			description: "Resultados, carteira e taxas",
+		},
+		{
+			id: "positions",
+			title: "Posições",
+			description: "Ordens abertas no bot",
+		},
+	]
 
 	// ── Render ───────────────────────────────────────────────────────────────
 	if (authLoading) return <div className="loading-screen">Carregando...</div>
@@ -111,6 +133,7 @@ function App() {
 
 	const openPositions = data?.openPositions ?? []
 	const balance = data?.state?.balance ?? 0
+	const symbol = data?.config?.symbol ?? "BTCUSDT"
 	const alocado = {
 		valorAlocado: openPositions.reduce((a, p) => a + p.quantity * p.buyPrice, 0),
 		qtdAlocada: openPositions.reduce((a, p) => a + p.quantity, 0),
@@ -133,22 +156,63 @@ function App() {
 				/>
 			)}
 
-			<div className="container">
-				<StatusIndicator enabled={data?.running ?? false} />
-				<Controls
-					onStart={handleStart}
-					onStop={handleStop}
-					price={data?.state?.currentPrice}
-				/>
-				<div className="cards">
-					<FinancialSummary
-						summary={summary}
-						balance={balance}
-						alocado={alocado}
-						summaryPrevisto={summaryOpen}
-					/>
-					<MarketState strategy={data?.state} />
-					<OpenPositions positions={openPositions} />
+			<div className="container dashboard-shell">
+				<div className="screen-nav">
+					{screens.map((screen) => (
+						<button
+							key={screen.id}
+							type="button"
+							className={`screen-card ${activeScreen === screen.id ? "active" : ""}`}
+							onClick={() => setActiveScreen(screen.id)}
+						>
+							<span className="screen-card-kicker">Tela</span>
+							<span className="screen-card-title">{screen.title}</span>
+							<span className="screen-card-description">{screen.description}</span>
+						</button>
+					))}
+				</div>
+
+				<div className="screen-panel">
+					<div className="screen-panel-header">
+						<div>
+							<p className="screen-panel-kicker">Painel principal</p>
+							<h2>{screens.find((screen) => screen.id === activeScreen)?.title ?? "Mercado"}</h2>
+						</div>
+						<button
+							type="button"
+							className="ghost-link"
+							onClick={() => setActiveScreen("home")}
+							disabled={activeScreen === "home"}
+						>
+							Voltar para inicio
+						</button>
+					</div>
+
+					{activeScreen === "home" && (
+						<div className="screen-stack">
+							<MarketState
+								strategy={data?.state}
+								enabled={data?.running ?? false}
+								onStart={handleStart}
+								onStop={handleStop}
+								price={data?.state?.currentPrice}
+								symbol={symbol}
+							/>
+						</div>
+					)}
+
+					{activeScreen === "finance" && (
+						<FinancialSummary
+							summary={summary}
+							balance={balance}
+							alocado={alocado}
+							summaryPrevisto={summaryOpen}
+						/>
+					)}
+
+					{activeScreen === "positions" && (
+						<OpenPositions positions={openPositions} />
+					)}
 				</div>
 			</div>
 		</>
