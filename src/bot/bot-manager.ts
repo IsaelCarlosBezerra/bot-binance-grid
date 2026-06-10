@@ -79,7 +79,7 @@ class BotManager {
 		if (!dbInstance) return null
 
 		let runtime = this.instances.get(userId)
-		if (!runtime && dbInstance.enabled) {
+		if (!runtime) {
 			try {
 				runtime = await this.loadAndStart(userId)
 			} catch {
