@@ -6,7 +6,7 @@ function metricClass(value) {
 	return value >= 0 ? "positive" : "negative"
 }
 
-export default function FinancialSummary({ summary, summaryPrevisto }) {
+export default function FinancialSummary({ summary, summaryPrevisto, balance, alocado }) {
 	if (!summary || !summaryPrevisto) {
 		return (
 			<div className="card">
@@ -16,9 +16,15 @@ export default function FinancialSummary({ summary, summaryPrevisto }) {
 		)
 	}
 
-	const { lucroLiquido } = summary
+	const { compras, vendas, lucroLiquido, totalTaxas, totalIR } = summary
+	const { valorAlocado, qtdAlocada } = alocado ?? { valorAlocado: 0, qtdAlocada: 0 }
+	const bal = balance ?? 0
+	const saldoCarteira = valorAlocado + bal
+	const percentualAlocado = saldoCarteira > 0 ? (valorAlocado / saldoCarteira) * 100 : 0
 	const { lucroLiquidoAberto } = summaryPrevisto
 	const lucroTotal = lucroLiquido + lucroLiquidoAberto
+	const totalTaxasGeral = totalTaxas + (summaryPrevisto.totalTaxasAberto ?? 0)
+	const totalIRGeral = totalIR + (summaryPrevisto.totalIRAberto ?? 0)
 
 	return (
 		<div className="card finance-card">
@@ -42,6 +48,41 @@ export default function FinancialSummary({ summary, summaryPrevisto }) {
 					<span className={`metric-value ${metricClass(lucroLiquidoAberto)}`}>
 						{lucroLiquidoAberto >= 0 ? "+" : ""}{fmt(lucroLiquidoAberto)}
 					</span>
+				</div>
+			</div>
+
+			<div className="finance-details">
+				<div className="stat-row">
+					<span className="stat-label">Compras realizadas</span>
+					<span className="stat-value">{compras.quantidade} · {fmt(compras.valorTotal)} USDT</span>
+				</div>
+				<div className="stat-row">
+					<span className="stat-label">Vendas realizadas</span>
+					<span className="stat-value">{vendas.quantidade} · {fmt(vendas.valorTotal)} USDT</span>
+				</div>
+				<div className="stat-row">
+					<span className="stat-label">Qtd. alocada</span>
+					<span className="stat-value">{qtdAlocada.toFixed(6)} BTC</span>
+				</div>
+				<div className="stat-row">
+					<span className="stat-label">Taxas pagas</span>
+					<span className="stat-value">{fmt(totalTaxasGeral)} USDT</span>
+				</div>
+				<div className="stat-row">
+					<span className="stat-label">IR estimado</span>
+					<span className="stat-value">{fmt(totalIRGeral)} USDT</span>
+				</div>
+				<div className="stat-row">
+					<span className="stat-label">Saldo Total</span>
+					<span className="stat-value">{fmt(saldoCarteira)} USDT</span>
+				</div>
+				<div className="stat-row">
+					<span className="stat-label">Saldo Livre</span>
+					<span className="stat-value">{fmt(bal)} USDT</span>
+				</div>
+				<div className="stat-row">
+					<span className="stat-label">% Alocado</span>
+					<span className="stat-value">{percentualAlocado.toFixed(1)}%</span>
 				</div>
 			</div>
 		</div>

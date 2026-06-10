@@ -116,12 +116,12 @@ function App() {
 		{
 			id: "finance",
 			title: "Financeiro",
-			description: "Resultados, carteira e taxas",
+			description: "Resultados e desempenho",
 		},
 		{
 			id: "wallet",
 			title: "Carteira",
-			description: "Saldo, alocação e movimento",
+			description: "Saldo e alocação",
 		},
 		{
 			id: "positions",
@@ -184,14 +184,15 @@ function App() {
 							<p className="screen-panel-kicker">Painel principal</p>
 							<h2>{screens.find((screen) => screen.id === activeScreen)?.title ?? "Mercado"}</h2>
 						</div>
-						<button
-							type="button"
-							className="ghost-link"
-							onClick={() => setActiveScreen("home")}
-							disabled={activeScreen === "home"}
-						>
-							Voltar para inicio
-						</button>
+						{activeScreen !== "home" && (
+							<button
+								type="button"
+								className="ghost-link"
+								onClick={() => setActiveScreen("home")}
+							>
+								Voltar para inicio
+							</button>
+						)}
 					</div>
 
 					{activeScreen === "home" && (
@@ -201,7 +202,6 @@ function App() {
 								enabled={data?.running ?? false}
 								onStart={handleStart}
 								onStop={handleStop}
-								price={data?.state?.currentPrice}
 								symbol={symbol}
 							/>
 						</div>
@@ -210,16 +210,16 @@ function App() {
 					{activeScreen === "finance" && (
 						<FinancialSummary
 							summary={summary}
+							balance={balance}
+							alocado={alocado}
 							summaryPrevisto={summaryOpen}
 						/>
 					)}
 
 					{activeScreen === "wallet" && (
 						<WalletSummary
-							summary={summary}
 							balance={balance}
 							alocado={alocado}
-							summaryPrevisto={summaryOpen}
 						/>
 					)}
 

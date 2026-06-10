@@ -1,7 +1,7 @@
 import StatusIndicator from "./StatusIndicator"
 import Controls from "./Controls"
 
-export default function MarketState({ strategy, enabled, onStart, onStop, price, symbol }) {
+export default function MarketState({ strategy, enabled, onStart, onStop, symbol }) {
 	const { currentPrice, nextBuyPrice, nextSellPrice } = strategy ?? {}
 	const marketSymbol = symbol ?? "BTCUSDT"
 
@@ -47,8 +47,8 @@ export default function MarketState({ strategy, enabled, onStart, onStop, price,
 			<Controls
 				onStart={onStart}
 				onStop={onStop}
-				price={price}
 				symbol={marketSymbol}
+				showBuy={false}
 			/>
 		</div>
 	)

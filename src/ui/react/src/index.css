@@ -676,6 +676,23 @@ button {
 	margin-top: 18px;
 }
 
+.wallet-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 14px;
+}
+
+.wallet-sync-btn {
+	padding: 10px 14px;
+	border-radius: 14px;
+	border: 1px solid var(--border-accent);
+	background: rgba(59,130,246,0.12);
+	color: var(--text-1);
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.1px;
+}
+
 .stat-row {
 	display: flex;
 	justify-content: space-between;
@@ -963,30 +980,40 @@ tbody tr:hover td { background: var(--bg-hover); }
 	}
 
 	.container {
-		padding: 12px;
+		padding: 12px 12px 110px;
 	}
 	.dashboard-shell {
 		grid-template-columns: 1fr;
-		gap: 12px;
+		gap: 10px;
 	}
 	.desktop-nav {
 		display: none;
 	}
 	.mobile-nav {
+		position: fixed;
+		left: 12px;
+		right: 12px;
+		bottom: 12px;
+		z-index: 60;
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 8px;
-		padding: 0;
-		margin-top: 2px;
+		gap: 6px;
+		padding: 8px;
+		margin-top: 0;
+		border: 1px solid var(--border);
+		border-radius: 18px;
+		background: rgba(8,12,20,0.95);
+		backdrop-filter: blur(14px);
+		box-shadow: 0 10px 34px rgba(0,0,0,0.45);
 	}
 	.mobile-nav-item {
-		padding: 8px 10px;
+		padding: 7px 8px;
 		border: 1px solid var(--border);
 		border-radius: 14px;
 		background: rgba(8,12,20,0.9);
 		color: var(--text-2);
 		text-align: left;
-		min-height: 54px;
+		min-height: 48px;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -998,12 +1025,12 @@ tbody tr:hover td { background: var(--bg-hover); }
 		color: var(--text-1);
 	}
 	.mobile-nav-title {
-		font-size: 12px;
+		font-size: 11px;
 		font-weight: 700;
 		line-height: 1.1;
 	}
 	.mobile-nav-desc {
-		font-size: 9px;
+		font-size: 8px;
 		line-height: 1.15;
 		color: var(--text-3);
 	}
@@ -1012,7 +1039,7 @@ tbody tr:hover td { background: var(--bg-hover); }
 	}
 
 	.screen-panel {
-		padding: 14px;
+		padding: 12px;
 		border-radius: 18px;
 	}
 	.screen-nav {
@@ -1020,13 +1047,13 @@ tbody tr:hover td { background: var(--bg-hover); }
 	}
 	.screen-card {
 		min-height: 0;
-		padding: 14px;
+		padding: 12px;
 	}
 	.screen-panel-header {
 		flex-direction: column;
 		align-items: stretch;
-		gap: 10px;
-		margin-bottom: 14px;
+		gap: 8px;
+		margin-bottom: 12px;
 	}
 	.screen-panel-header h2 { font-size: 1.15rem; }
 	.ghost-link {
@@ -1034,11 +1061,14 @@ tbody tr:hover td { background: var(--bg-hover); }
 	}
 
 	.market-card {
-		padding: 16px;
+		padding: 14px;
 	}
 	.market-header {
 		align-items: flex-start;
 		flex-direction: column;
+	}
+	.market-subtitle {
+		font-size: 12px;
 	}
 	.price-targets {
 		grid-template-columns: 1fr;
@@ -1071,6 +1101,23 @@ tbody tr:hover td { background: var(--bg-hover); }
 		min-width: 0;
 	}
 
+	.wallet-actions {
+		margin-bottom: 12px;
+	}
+	.wallet-sync-btn {
+		width: 100%;
+		padding: 9px 12px;
+		border-radius: 14px;
+		border: 1px solid var(--border-accent);
+		background: rgba(59,130,246,0.12);
+		color: var(--text-1);
+		font-size: 12px;
+		font-weight: 700;
+	}
+	.wallet-sync-btn:active {
+		transform: translateY(1px);
+	}
+
 	.login-card {
 		padding: 24px 18px;
 	}
@@ -1079,10 +1126,22 @@ tbody tr:hover td { background: var(--bg-hover); }
 	.settings-modal { border-radius: var(--radius-lg) var(--radius-lg) 0 0; max-height: 92vh; max-width: 100%; }
 
 	.price-current { font-size: 1.8rem; }
+	.price-display {
+		padding: 12px 0 14px;
+	}
+	.price-targets {
+		gap: 6px;
+	}
 	.metrics-grid  { grid-template-columns: 1fr 1fr; }
 	.finance-results-grid,
 	.finance-wallet-grid {
 		grid-template-columns: 1fr;
+	}
+	.metric {
+		padding: 10px;
+	}
+	.card-title {
+		margin-bottom: 12px;
 	}
 	.finance-details {
 		margin-top: 14px;
@@ -1091,7 +1150,7 @@ tbody tr:hover td { background: var(--bg-hover); }
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 4px;
-		padding: 10px 0;
+		padding: 8px 0;
 	}
 
 	.positions-table {
@@ -1099,13 +1158,13 @@ tbody tr:hover td { background: var(--bg-hover); }
 	}
 	.positions-mobile-list {
 		display: grid;
-		gap: 12px;
+		gap: 10px;
 	}
 	.position-mobile-card {
 		display: block;
 		border: 1px solid var(--border);
 		border-radius: 16px;
-		padding: 14px;
+		padding: 12px;
 		background: var(--bg-elevated);
 	}
 	.position-mobile-top {
@@ -1123,7 +1182,7 @@ tbody tr:hover td { background: var(--bg-hover); }
 	.position-mobile-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 12px 10px;
+		gap: 10px 8px;
 	}
 	.position-mobile-label {
 		display: block;

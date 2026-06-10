@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { buy } from "../services/api"
 
-export default function Controls({ onStart, onStop, price, symbol = "BTCUSDT" }) {
+export default function Controls({ onStart, onStop, price, symbol = "BTCUSDT", showBuy = true }) {
 	const [valor, setValor] = useState(0)
 	const [qtd, setQtd] = useState("")
 
@@ -28,24 +28,26 @@ export default function Controls({ onStart, onStop, price, symbol = "BTCUSDT" })
 				<button className="start" onClick={onStart}>▶ Iniciar</button>
 				<button className="stop" onClick={onStop}>⏸ Pausar</button>
 			</div>
-			<div className="controlsbuy">
-				<span className="controlsbuy-label">{symbol}</span>
-				<span className="controlsbuy-label">{valor.toFixed(2)} USDT</span>
-				<input
-					type="number"
-					min={0}
-					placeholder="0.00"
-					onChange={handleChangeQtd}
-					autoComplete="off"
-				/>
-				<button
-					disabled={!(Number(qtd) > 0)}
-					onClick={() => comprar(symbol, qtd)}
-					className="comprar"
-				>
-					Comprar
-				</button>
-			</div>
+			{showBuy && (
+				<div className="controlsbuy">
+					<span className="controlsbuy-label">{symbol}</span>
+					<span className="controlsbuy-label">{valor.toFixed(2)} USDT</span>
+					<input
+						type="number"
+						min={0}
+						placeholder="0.00"
+						onChange={handleChangeQtd}
+						autoComplete="off"
+					/>
+					<button
+						disabled={!(Number(qtd) > 0)}
+						onClick={() => comprar(symbol, qtd)}
+						className="comprar"
+					>
+						Comprar
+					</button>
+				</div>
+			)}
 		</div>
 	)
 }
