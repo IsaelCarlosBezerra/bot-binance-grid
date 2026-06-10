@@ -311,6 +311,45 @@ lucroLiquido = vendasValor - comprasValor - taxas - IR
 5. Executa `marketBuy`
 6. Registra a posição com preço de venda calculado
 
+## Tratamento de falhas do ciclo
+
+Esta parte foi implementada para evitar que o bot pare por motivos que podem ser tratados localmente e para manter o comportamento seguro em produção.
+
+### O que foi implementado
+
+- `src/bot/trade-safety.ts`
+  - `classifyBuyPrecheck(freeBalance, validation)` identifica antes da ordem se a compra deve ser ignorada.
+  - `isRetryableExecutionError(error)` classifica erros transitórios de execução.
+  - `retryOperation(operation, options)` executa novamente operações que falharam por erro temporário.
+- `src/bot/bot-cycle.ts`
+  - compra com saldo insuficiente passa a ser apenas ignorada com log de aviso, sem parar o bot.
+  - ordem inválida pelos filtros da Binance passa a ser ignorada com log de aviso.
+  - `marketBuy` e `marketSell` agora usam retry com backoff simples para falhas transitórias.
+  - se a compra for executada com sucesso, mas a persistência da posição falhar, o bot para para evitar inconsistência entre mercado e banco.
+  - o ciclo continua broadcastando estado após execuções bem-sucedidas ou ciclos sem ação.
+
+### Regras aplicadas
+
+- saldo insuficiente: não executa compra e não derruba o bot.
+- validação de ordem inválida: não executa compra e não derruba o bot.
+- erro transitório de rede/execução: tenta novamente antes de falhar.
+- falha ao registrar no banco após compra executada: interrompe o bot para evitar divergência entre saldo, posições e histórico.
+
+### O que foi testado
+
+- `src/__tests__/trade-safety.test.ts`
+  - saldo insuficiente retorna `INSUFFICIENT_BALANCE`
+  - validação inválida retorna `INVALID_ORDER`
+  - erros temporários são reconhecidos como retryable
+  - operação com falha transitória é reexecutada com sucesso
+  - erros não retryable não são reexecutados
+- `src/__tests__/bot-cycle.test.ts`
+  - o ciclo principal continua passando com as novas regras de segurança
+- Validação local executada
+  - `npm run build`
+  - `node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand`
+  - a suite completa ficou verde com 8 suites e 48 testes
+
 ## Administração
 
 ### Funções disponíveis

@@ -6,6 +6,10 @@ import {
 	getUltimaPositionOpen,
 } from "../positions/position.store.js"
 import { dashboardEvents } from "./dashboard-events.js"
+import {
+	classifyBuyPrecheck,
+	retryOperation,
+} from "./trade-safety.js"
 
 // ─── Helpers de cálculo ────────────────────────────────────────────────────
 
@@ -100,8 +104,14 @@ async function trySell(bot: BotRuntime): Promise<boolean> {
 
 	if (ultimaPosicaoAberta && nextSellPrice <= currentPrice) {
 		const position = ultimaPosicaoAberta
-		await bot.client.marketSell(position.symbol, position.quantity)
-		await closePosition(bot.instanceId, position.id)
+		try {
+			await retryOperation(() => bot.client.marketSell(position.symbol, position.quantity))
+			await closePosition(bot.instanceId, position.id)
+		} catch (error) {
+			console.error(`❌ [${bot.userId}] Falha ao vender/fechar posição:`, error)
+			bot.stop()
+			return false
+		}
 
 		const newBalance = bot.state.balance + currentPrice * position.quantity
 		await atualizarState(bot, newBalance)
@@ -127,39 +137,54 @@ async function tryBuy(bot: BotRuntime): Promise<boolean> {
 	const { validateAndAdjustOrder } = await import("../binance/order.validator.js")
 
 	const freeBalance = await getAssetBalance("USDT", bot.client)
-	if (freeBalance <= 0) {
-		bot.stop()
-		return false
-	}
-
 	const buyValue = freeBalance * bot.config.buyPercentageOfBalance
 	const rawQuantity = buyValue / currentPrice
 	const filters = await getSymbolFilters(bot.config.symbol, bot.client)
 	const validation = validateAndAdjustOrder({ quantity: rawQuantity, price: currentPrice, filters })
 
-	if (!validation.valid || !validation.quantity) {
-		console.log(`❌ [${bot.userId}] Compra inválida: ${validation.reason}`)
-		bot.stop()
+	const precheck = classifyBuyPrecheck(freeBalance, validation)
+	if (precheck) {
+		console.warn(`⚠️ [${bot.userId}] Compra ignorada (${precheck.reason}): ${precheck.message}`)
 		return false
 	}
 
 	const quantity = validation.quantity
-	await bot.client.marketBuy(bot.config.symbol, quantity)
+	if (quantity === undefined) {
+		console.warn(`⚠️ [${bot.userId}] Compra ignorada: quantidade inválida após validação`)
+		return false
+	}
+	try {
+		await retryOperation(() => bot.client.marketBuy(bot.config.symbol, quantity))
+	} catch (error) {
+		console.error(`❌ [${bot.userId}] Falha ao executar compra:`, error)
+		bot.stop()
+		return false
+	}
 
 	const sellPrice = calcularPrecoVenda(currentPrice, bot.config.grossTargetPercentage)
-	const added = await addPosition(bot.instanceId, bot.plan, {
-		symbol: bot.config.symbol,
-		buyPrice: currentPrice,
-		quantity,
-		sellPrice,
-		expectedNetProfit: bot.config.targetNetProfit,
-	})
+	let added = null
+	try {
+		added = await addPosition(bot.instanceId, bot.plan, {
+			symbol: bot.config.symbol,
+			buyPrice: currentPrice,
+			quantity,
+			sellPrice,
+			expectedNetProfit: bot.config.targetNetProfit,
+		})
+	} catch (error) {
+		console.error(`❌ [${bot.userId}] Falha ao persistir compra executada:`, error)
+		bot.stop()
+		return false
+	}
 
 	if (added) {
 		const newBalance = freeBalance - currentPrice * quantity
 		await atualizarState(bot, newBalance)
 		await broadcastState(bot, true, true)
 		console.log(`🟢 [${bot.userId}] COMPRA | qty=${quantity} | price=${currentPrice} | sell=${sellPrice}`)
+	} else {
+		console.error(`❌ [${bot.userId}] Compra executada, mas não foi possível persistir a posição`)
+		bot.stop()
 	}
 
 	return !!added
