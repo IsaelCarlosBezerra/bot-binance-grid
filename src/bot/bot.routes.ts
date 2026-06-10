@@ -177,16 +177,13 @@ export function registerBotRoutes(app: Express) {
 	// ── Saldo ─────────────────────────────────────────────────────────────
 	app.get("/bot/balance", async (req: AuthRequest, res: Response) => {
 		const userId = req.user!.userId
-		const runtime = botManager.get(userId)
-
-		if (!runtime) {
-			res.status(400).json({ error: "Bot não está carregado. Inicie o bot primeiro." })
+		let balance: number
+		try {
+			balance = await botManager.syncBalance(userId)
+		} catch {
+			res.status(404).json({ error: "Bot não configurado" })
 			return
 		}
-
-		const { getAssetBalance } = await import("../binance/account.service.js")
-		const balance = await getAssetBalance("USDT", runtime.client)
-		runtime.state.balance = balance
 		res.json({ balance })
 	})
 

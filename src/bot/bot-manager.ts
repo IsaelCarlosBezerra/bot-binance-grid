@@ -10,6 +10,11 @@ class BotManager {
 	private priceIntervals: Map<string, ReturnType<typeof setInterval>> = new Map()
 	private wsEndpoints: Map<string, string> = new Map()
 
+	async syncBalance(userId: string): Promise<number> {
+		const runtime = await this.loadAndStart(userId)
+		return this.refreshBalance(runtime)
+	}
+
 	async loadAndStart(userId: string): Promise<BotRuntime> {
 		const existing = this.instances.get(userId)
 		if (existing?.isRunning) return existing
@@ -122,12 +127,10 @@ class BotManager {
 	private async initializeState(runtime: BotRuntime): Promise<void> {
 		try {
 			await this.liquidatePendingOnRestart(runtime)
-			const { getAssetBalance } = await import("../binance/account.service.js")
-			const balance = await getAssetBalance("USDT", runtime.client)
+			const balance = await this.refreshBalance(runtime)
 			const ultimaPosicaoAberta = await getUltimaPositionOpen(runtime.instanceId)
 			const precoAtual = runtime.isPriceReady() ? runtime.getPrice() : 0
 			const dropPct = runtime.config.dropPercentage
-			runtime.state.balance = balance
 			runtime.state.ultimaPosicaoAberta = ultimaPosicaoAberta
 			if (ultimaPosicaoAberta) {
 				runtime.state.nextBuyPrice = ultimaPosicaoAberta.buyPrice * (1 - dropPct)
@@ -138,6 +141,13 @@ class BotManager {
 		} catch (error) {
 			console.error(`⚠️ [${runtime.userId}] Erro ao inicializar estado:`, error)
 		}
+	}
+
+	private async refreshBalance(runtime: BotRuntime): Promise<number> {
+		const { getAssetBalance } = await import("../binance/account.service.js")
+		const balance = await getAssetBalance("USDT", runtime.client)
+		runtime.state.balance = balance
+		return balance
 	}
 
 	private async liquidatePendingOnRestart(runtime: BotRuntime): Promise<void> {
