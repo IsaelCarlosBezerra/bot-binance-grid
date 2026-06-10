@@ -672,6 +672,10 @@ button {
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.finance-details-grid {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .finance-details {
 	margin-top: 18px;
 }
@@ -1136,6 +1140,9 @@ tbody tr:hover td { background: var(--bg-hover); }
 	.finance-results-grid,
 	.finance-wallet-grid {
 		grid-template-columns: 1fr;
+	}
+	.finance-details-grid {
+		grid-template-columns: 1fr 1fr;
 	}
 	.metric {
 		padding: 9px;
