@@ -15,6 +15,7 @@ import {
 	stopBot,
 	loadStatus,
 	loadSummary,
+	loadBalance,
 } from "./services/api"
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
 	const [data, setData] = useState(null)
 	const [summary, setSummary] = useState(null)
 	const [summaryOpen, setSummaryOpen] = useState(null)
+	const [syncingBalance, setSyncingBalance] = useState(false)
 
 	// ── Auth bootstrap ──────────────────────────────────────────────────────
 	useEffect(() => {
@@ -106,6 +108,21 @@ function App() {
 
 	const handleStart = async () => { await startBot(); fetchAll() }
 	const handleStop = async () => { await stopBot(); fetchAll() }
+	const handleSyncBalance = async () => {
+		setSyncingBalance(true)
+		try {
+			const result = await loadBalance()
+			if (result && typeof result.balance === "number") {
+				setData((prev) => (
+					prev
+						? { ...prev, state: { ...prev.state, balance: result.balance } }
+						: prev
+				))
+			}
+		} finally {
+			setSyncingBalance(false)
+		}
+	}
 
 	const screens = [
 		{
@@ -210,8 +227,6 @@ function App() {
 					{activeScreen === "finance" && (
 						<FinancialSummary
 							summary={summary}
-							balance={balance}
-							alocado={alocado}
 							summaryPrevisto={summaryOpen}
 						/>
 					)}
@@ -220,6 +235,8 @@ function App() {
 						<WalletSummary
 							balance={balance}
 							alocado={alocado}
+							onSyncBalance={handleSyncBalance}
+							syncingBalance={syncingBalance}
 						/>
 					)}
 

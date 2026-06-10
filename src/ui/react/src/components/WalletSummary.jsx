@@ -2,7 +2,7 @@ function fmt(n) {
 	return (n ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
-export default function WalletSummary({ balance, alocado }) {
+export default function WalletSummary({ balance, alocado, onSyncBalance, syncingBalance }) {
 	if (balance === null || balance === undefined) {
 		return (
 			<div className="card">
@@ -22,8 +22,13 @@ export default function WalletSummary({ balance, alocado }) {
 			<div className="card-title">Carteira</div>
 
 			<div className="wallet-actions">
-				<button type="button" className="wallet-sync-btn">
-					Sincronizar saldo da carteira
+				<button
+					type="button"
+					className="wallet-sync-btn"
+					onClick={onSyncBalance}
+					disabled={syncingBalance}
+				>
+					{syncingBalance ? "Sincronizando..." : "Sincronizar saldo da carteira"}
 				</button>
 			</div>
 

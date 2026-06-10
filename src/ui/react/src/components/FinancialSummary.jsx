@@ -6,7 +6,7 @@ function metricClass(value) {
 	return value >= 0 ? "positive" : "negative"
 }
 
-export default function FinancialSummary({ summary, summaryPrevisto, balance, alocado }) {
+export default function FinancialSummary({ summary, summaryPrevisto }) {
 	if (!summary || !summaryPrevisto) {
 		return (
 			<div className="card">
@@ -17,10 +17,6 @@ export default function FinancialSummary({ summary, summaryPrevisto, balance, al
 	}
 
 	const { compras, vendas, lucroLiquido, totalTaxas, totalIR } = summary
-	const { valorAlocado, qtdAlocada } = alocado ?? { valorAlocado: 0, qtdAlocada: 0 }
-	const bal = balance ?? 0
-	const saldoCarteira = valorAlocado + bal
-	const percentualAlocado = saldoCarteira > 0 ? (valorAlocado / saldoCarteira) * 100 : 0
 	const { lucroLiquidoAberto } = summaryPrevisto
 	const lucroTotal = lucroLiquido + lucroLiquidoAberto
 	const totalTaxasGeral = totalTaxas + (summaryPrevisto.totalTaxasAberto ?? 0)
@@ -71,18 +67,6 @@ export default function FinancialSummary({ summary, summaryPrevisto, balance, al
 				<div className="stat-row">
 					<span className="stat-label">IR estimado</span>
 					<span className="stat-value">{fmt(totalIRGeral)} USDT</span>
-				</div>
-				<div className="stat-row">
-					<span className="stat-label">Saldo Total</span>
-					<span className="stat-value">{fmt(saldoCarteira)} USDT</span>
-				</div>
-				<div className="stat-row">
-					<span className="stat-label">Saldo Livre</span>
-					<span className="stat-value">{fmt(bal)} USDT</span>
-				</div>
-				<div className="stat-row">
-					<span className="stat-label">% Alocado</span>
-					<span className="stat-value">{percentualAlocado.toFixed(1)}%</span>
 				</div>
 			</div>
 		</div>
