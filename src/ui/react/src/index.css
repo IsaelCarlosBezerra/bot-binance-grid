@@ -1181,6 +1181,18 @@ tbody tr:hover td { background: var(--bg-hover); }
 		gap: 12px;
 		margin-bottom: 12px;
 	}
+	.position-mobile-profit-block {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 3px;
+	}
+	.position-mobile-profit-label {
+		font-size: 9px;
+		letter-spacing: 0.6px;
+		text-transform: uppercase;
+		color: var(--text-3);
+	}
 	.position-mobile-profit {
 		font-size: 14px;
 		font-weight: 700;

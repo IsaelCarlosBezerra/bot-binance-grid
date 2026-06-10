@@ -2,17 +2,28 @@ function fmt(n) {
 	return (n ?? 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
+const BINANCE_FEE_RATE = 0.001
+const IR_RATE = 0.15
+
 function PositionCard({ pos }) {
 	const invested = pos.buyPrice * pos.quantity
-	const profit = (pos.sellPrice - pos.buyPrice) * pos.quantity
+	const buyValue = pos.buyPrice * pos.quantity
+	const sellValue = pos.sellPrice * pos.quantity
+	const grossProfit = sellValue - buyValue
+	const fees = buyValue * BINANCE_FEE_RATE + sellValue * BINANCE_FEE_RATE
+	const ir = grossProfit > 0 ? grossProfit * IR_RATE : 0
+	const profit = grossProfit - fees - ir
 
 	return (
 		<div className="position-mobile-card">
 			<div className="position-mobile-top">
 				<span className="status-badge">OPEN</span>
-				<span className={`position-mobile-profit ${profit >= 0 ? "positive" : "negative"}`}>
-					{profit >= 0 ? "+" : ""}{fmt(profit)}
-				</span>
+				<div className="position-mobile-profit-block">
+					<span className="position-mobile-profit-label">Lucro esp. líquido</span>
+					<span className={`position-mobile-profit ${profit >= 0 ? "positive" : "negative"}`}>
+						{profit >= 0 ? "+" : ""}{fmt(profit)}
+					</span>
+				</div>
 			</div>
 
 			<div className="position-mobile-grid">
@@ -60,13 +71,18 @@ export default function OpenPositions({ positions }) {
 							<th>Alvo</th>
 							<th>Qtd</th>
 							<th>Investido</th>
-							<th>Lucro esp.</th>
+							<th>Lucro esp. líquido</th>
 						</tr>
 					</thead>
 					<tbody>
 						{positions.map((pos) => {
 							const invested = pos.buyPrice * pos.quantity
-							const profit = (pos.sellPrice - pos.buyPrice) * pos.quantity
+							const buyValue = pos.buyPrice * pos.quantity
+							const sellValue = pos.sellPrice * pos.quantity
+							const grossProfit = sellValue - buyValue
+							const fees = buyValue * BINANCE_FEE_RATE + sellValue * BINANCE_FEE_RATE
+							const ir = grossProfit > 0 ? grossProfit * IR_RATE : 0
+							const profit = grossProfit - fees - ir
 							return (
 								<tr key={pos.id}>
 									<td>
