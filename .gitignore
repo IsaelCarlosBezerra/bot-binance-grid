@@ -4,5 +4,6 @@ package-lock.json
 /src/generated/prisma
 dist
 coverage
+.claude/
 data/positions.json
 .fly
