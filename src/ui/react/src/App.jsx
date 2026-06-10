@@ -118,6 +118,7 @@ function App() {
 						? { ...prev, state: { ...prev.state, balance: result.balance } }
 						: prev
 				))
+				await fetchAll()
 			}
 		} finally {
 			setSyncingBalance(false)

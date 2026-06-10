@@ -186,6 +186,7 @@ export function registerBotRoutes(app: Express) {
 
 		const { getAssetBalance } = await import("../binance/account.service.js")
 		const balance = await getAssetBalance("USDT", runtime.client)
+		runtime.state.balance = balance
 		res.json({ balance })
 	})
 
