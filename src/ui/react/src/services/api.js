@@ -1,4 +1,4 @@
-const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:3001").replace(/\/$/, "")
+export const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:3001").replace(/\/$/, "")
 
 // ─── Token ────────────────────────────────────────────────────────────────────
 
@@ -6,7 +6,7 @@ export const getToken = () => localStorage.getItem("token")
 export const setToken = (token) => localStorage.setItem("token", token)
 export const clearToken = () => localStorage.removeItem("token")
 
-function authHeaders() {
+export function authHeaders() {
 	return {
 		"Content-Type": "application/json",
 		Authorization: `Bearer ${getToken()}`,

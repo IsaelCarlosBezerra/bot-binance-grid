@@ -1,6 +1,7 @@
 import type { Express, Response } from "express"
 import { authMiddleware, type AuthRequest } from "../auth/auth.middleware.js"
 import { botManager } from "./bot-manager.js"
+import { dashboardEvents } from "./dashboard-events.js"
 import { encrypt } from "../auth/crypto.service.js"
 import {
 	getOpenPositions,
@@ -11,6 +12,11 @@ import prisma from "../lib/prisma.js"
 export function registerBotRoutes(app: Express) {
 	// Todas as rotas de bot requerem autenticação
 	app.use("/bot", authMiddleware)
+
+	function sendSse(res: Response, event: string, payload: unknown) {
+		res.write(`event: ${event}\n`)
+		res.write(`data: ${JSON.stringify(payload)}\n\n`)
+	}
 
 	// ── Configurar instância (API Keys + config) ──────────────────────────
 	app.post("/bot/setup", async (req: AuthRequest, res: Response) => {
@@ -48,46 +54,50 @@ export function registerBotRoutes(app: Express) {
 		res.json({ ok: true, instance })
 	})
 
-	// ── Status do bot ─────────────────────────────────────────────────────
-	app.get("/bot/status", async (req: AuthRequest, res: Response) => {
+	app.get("/bot/stream", async (req: AuthRequest, res: Response) => {
 		const userId = req.user!.userId
-		let runtime = botManager.get(userId)
 
-		const dbInstance = await prisma.botInstance.findUnique({
-			where: { userId },
-			select: {
-				id: true, symbol: true, testnet: true, enabled: true,
-				cycleIntervalMs: true, buyPercentageOfBalance: true,
-				targetNetProfit: true, grossTargetPercentage: true,
-				dropPercentage: true, buyReferenceMode: true,
-			},
-		})
-
-		if (!dbInstance) {
+		const snapshot = await botManager.getDashboardSnapshot(userId)
+		if (!snapshot) {
 			res.status(404).json({ error: "Bot não configurado. Use POST /bot/setup primeiro." })
 			return
 		}
 
-		if (!runtime) {
-			try {
-				runtime = await botManager.loadAndStart(userId)
-			} catch {
-				runtime = undefined
-			}
+		const summary = await botManager.getDashboardSummary(userId)
+
+		res.status(200)
+		res.setHeader("Content-Type", "text/event-stream; charset=utf-8")
+		res.setHeader("Cache-Control", "no-cache, no-transform")
+		res.setHeader("Connection", "keep-alive")
+		res.flushHeaders?.()
+
+		sendSse(res, "snapshot", {
+			status: snapshot,
+			summary: summary?.summary ?? null,
+			summaryOpen: summary?.summaryOpen ?? null,
+		})
+
+		const unsubscribe = dashboardEvents.subscribe(userId, (event) => {
+			sendSse(res, event.type, event.payload)
+		})
+
+		req.on("close", () => {
+			unsubscribe()
+			res.end()
+		})
+	})
+
+	// ── Status do bot ─────────────────────────────────────────────────────
+	app.get("/bot/status", async (req: AuthRequest, res: Response) => {
+		const userId = req.user!.userId
+		const snapshot = await botManager.getDashboardSnapshot(userId)
+
+		if (!snapshot) {
+			res.status(404).json({ error: "Bot não configurado. Use POST /bot/setup primeiro." })
+			return
 		}
 
-		const openPositions = runtime
-			? await getOpenPositions(runtime.instanceId)
-			: []
-
-		res.json({
-			configured: true,
-			running: runtime?.isRunning ?? false,
-			plan: req.user!.plan,
-			config: dbInstance,
-			state: runtime?.state ?? null,
-			openPositions,
-		})
+		res.json(snapshot)
 	})
 
 	// ── Iniciar bot ───────────────────────────────────────────────────────
@@ -128,6 +138,19 @@ export function registerBotRoutes(app: Express) {
 		const runtime = botManager.get(userId)
 		if (runtime) Object.assign(runtime.config, data)
 
+		const snapshot = await botManager.getDashboardSnapshot(userId)
+		const summary = await botManager.getDashboardSummary(userId)
+		if (snapshot) {
+			dashboardEvents.emitForUser(userId, {
+				type: "snapshot",
+				payload: {
+					status: snapshot,
+					summary: summary?.summary ?? null,
+					summaryOpen: summary?.summaryOpen ?? null,
+				},
+			})
+		}
+
 		res.json({ ok: true, instance })
 	})
 
@@ -160,26 +183,14 @@ export function registerBotRoutes(app: Express) {
 	// ── Resumo financeiro ─────────────────────────────────────────────────
 	app.get("/bot/summary", async (req: AuthRequest, res: Response) => {
 		const userId = req.user!.userId
-		const runtime = botManager.get(userId)
+		const summary = await botManager.getDashboardSummary(userId)
 
-		const dbInstance = runtime
-			? { id: runtime.instanceId }
-			: await prisma.botInstance.findUnique({ where: { userId }, select: { id: true } })
-
-		if (!dbInstance) {
+		if (!summary) {
 			res.status(404).json({ error: "Bot não configurado" })
 			return
 		}
 
-		const { generateTradeSummary, generateTradeSummaryOpen } = await import(
-			"../reports/trade-report.js"
-		)
-		const [summary, summaryOpen] = await Promise.all([
-			generateTradeSummary(dbInstance.id),
-			generateTradeSummaryOpen(dbInstance.id),
-		])
-
-		res.json({ summary, summaryOpen })
+		res.json(summary)
 	})
 
 	// ── Saldo ─────────────────────────────────────────────────────────────

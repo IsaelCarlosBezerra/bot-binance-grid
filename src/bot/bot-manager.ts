@@ -1,5 +1,6 @@
 import Binance from "node-binance-api"
 import { BotRuntime, type BotConfig } from "./bot-runtime.js"
+import { dashboardEvents, type DashboardStatus, type DashboardConfig } from "./dashboard-events.js"
 import { decrypt } from "../auth/crypto.service.js"
 import { getUltimaPositionOpen, closePosition, getOpenPositions } from "../positions/position.store.js"
 import prisma from "../lib/prisma.js"
@@ -67,6 +68,67 @@ class BotManager {
 
 	get(userId: string): BotRuntime | undefined {
 		return this.instances.get(userId)
+	}
+
+	async getDashboardSnapshot(userId: string): Promise<DashboardStatus | null> {
+		const dbInstance = await prisma.botInstance.findUnique({
+			where: { userId },
+			include: { user: { select: { plan: true } } },
+		})
+
+		if (!dbInstance) return null
+
+		let runtime = this.instances.get(userId)
+		if (!runtime && dbInstance.enabled) {
+			try {
+				runtime = await this.loadAndStart(userId)
+			} catch {
+				runtime = undefined
+			}
+		}
+
+		const openPositions = runtime
+			? await getOpenPositions(runtime.instanceId)
+			: await getOpenPositions(dbInstance.id)
+
+		const config: DashboardConfig = {
+			id: dbInstance.id,
+			symbol: dbInstance.symbol,
+			testnet: dbInstance.testnet,
+			enabled: dbInstance.enabled,
+			cycleIntervalMs: dbInstance.cycleIntervalMs,
+			buyPercentageOfBalance: dbInstance.buyPercentageOfBalance,
+			targetNetProfit: dbInstance.targetNetProfit,
+			grossTargetPercentage: dbInstance.grossTargetPercentage,
+			dropPercentage: dbInstance.dropPercentage,
+			buyReferenceMode: dbInstance.buyReferenceMode as BotConfig["buyReferenceMode"],
+		}
+
+		return {
+			configured: true,
+			running: runtime?.isRunning ?? false,
+			plan: dbInstance.user.plan as "FREE" | "PRO",
+			config,
+			state: runtime?.state ?? null,
+			openPositions,
+		}
+	}
+
+	async getDashboardSummary(userId: string): Promise<{ summary: unknown; summaryOpen: unknown } | null> {
+		const runtime = this.instances.get(userId)
+		const dbInstance = runtime
+			? { id: runtime.instanceId }
+			: await prisma.botInstance.findUnique({ where: { userId }, select: { id: true } })
+
+		if (!dbInstance) return null
+
+		const { generateTradeSummary, generateTradeSummaryOpen } = await import("../reports/trade-report.js")
+		const [summary, summaryOpen] = await Promise.all([
+			generateTradeSummary(dbInstance.id),
+			generateTradeSummaryOpen(dbInstance.id),
+		])
+
+		return { summary, summaryOpen }
 	}
 
 	async startBot(userId: string): Promise<void> {
@@ -138,6 +200,12 @@ class BotManager {
 			} else if (precoAtual > 0) {
 				runtime.state.nextBuyPrice = precoAtual * (1 - dropPct)
 			}
+			dashboardEvents.emitForUser(runtime.userId, {
+				type: "state",
+				payload: {
+					state: { ...runtime.state, balance },
+				},
+			})
 		} catch (error) {
 			console.error(`⚠️ [${runtime.userId}] Erro ao inicializar estado:`, error)
 		}
@@ -147,6 +215,12 @@ class BotManager {
 		const { getAssetBalance } = await import("../binance/account.service.js")
 		const balance = await getAssetBalance("USDT", runtime.client)
 		runtime.state.balance = balance
+		dashboardEvents.emitForUser(runtime.userId, {
+			type: "state",
+			payload: {
+				state: { balance },
+			},
+		})
 		return balance
 	}
 

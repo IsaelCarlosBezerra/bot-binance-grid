@@ -5,6 +5,7 @@ import {
 	getOpenPositions,
 	getUltimaPositionOpen,
 } from "../positions/position.store.js"
+import { dashboardEvents } from "./dashboard-events.js"
 
 // ─── Helpers de cálculo ────────────────────────────────────────────────────
 
@@ -40,6 +41,39 @@ async function atualizarState(bot: BotRuntime, balance: number): Promise<void> {
 	bot.state.balance = balance
 }
 
+async function broadcastState(bot: BotRuntime, includeOpenPositions = false, includeSummary = false): Promise<void> {
+	const payload: {
+		running: boolean
+		state: BotRuntime["state"]
+		openPositions?: Awaited<ReturnType<typeof getOpenPositions>>
+	} = {
+		running: bot.isRunning,
+		state: { ...bot.state },
+	}
+
+	if (includeOpenPositions) {
+		payload.openPositions = await getOpenPositions(bot.instanceId)
+	}
+
+	dashboardEvents.emitForUser(bot.userId, {
+		type: "state",
+		payload,
+	})
+
+	if (includeSummary) {
+		const { generateTradeSummary, generateTradeSummaryOpen } = await import("../reports/trade-report.js")
+		const [summary, summaryOpen] = await Promise.all([
+			generateTradeSummary(bot.instanceId),
+			generateTradeSummaryOpen(bot.instanceId),
+		])
+
+		dashboardEvents.emitForUser(bot.userId, {
+			type: "summary",
+			payload: { summary, summaryOpen },
+		})
+	}
+}
+
 // ─── Calibrar preço de compra ─────────────────────────────────────────────
 
 function calibrarPrecoCompra(bot: BotRuntime): void {
@@ -71,6 +105,7 @@ async function trySell(bot: BotRuntime): Promise<boolean> {
 
 		const newBalance = bot.state.balance + currentPrice * position.quantity
 		await atualizarState(bot, newBalance)
+		await broadcastState(bot, true, true)
 
 		console.log(`✅ [${bot.userId}] VENDA | qty=${position.quantity} | price=${currentPrice}`)
 		return true
@@ -123,6 +158,7 @@ async function tryBuy(bot: BotRuntime): Promise<boolean> {
 	if (added) {
 		const newBalance = freeBalance - currentPrice * quantity
 		await atualizarState(bot, newBalance)
+		await broadcastState(bot, true, true)
 		console.log(`🟢 [${bot.userId}] COMPRA | qty=${quantity} | price=${currentPrice} | sell=${sellPrice}`)
 	}
 
@@ -139,5 +175,8 @@ export async function runDecisionCycleForInstance(bot: BotRuntime): Promise<void
 	const sold = await trySell(bot)
 	if (sold) return
 
-	await tryBuy(bot)
+	const bought = await tryBuy(bot)
+	if (bought) return
+
+	await broadcastState(bot, false, false)
 }

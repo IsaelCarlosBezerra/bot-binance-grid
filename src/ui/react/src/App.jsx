@@ -8,15 +8,48 @@ import LoginPage from "./components/LoginPage"
 import BotSetup from "./components/BotSetup"
 import SettingsPage from "./components/SettingsPage"
 import {
+	API_URL,
+	authHeaders,
 	getToken,
 	clearToken,
 	getMe,
 	startBot,
 	stopBot,
-	loadStatus,
-	loadSummary,
 	loadBalance,
 } from "./services/api"
+
+function mergeDashboardState(prev, patch) {
+	if (!prev) return patch
+
+	return {
+		...prev,
+		...patch,
+		config: patch.config ? { ...prev.config, ...patch.config } : prev.config,
+		state: patch.state ? { ...prev.state, ...patch.state } : prev.state,
+		openPositions: patch.openPositions ? patch.openPositions : prev.openPositions,
+	}
+}
+
+function parseSseBlock(block) {
+	let event = "message"
+	let data = ""
+
+	for (const line of block.split(/\r?\n/)) {
+		if (line.startsWith("event:")) {
+			event = line.slice(6).trim()
+		} else if (line.startsWith("data:")) {
+			data += line.slice(5).trimStart()
+		}
+	}
+
+	if (!data) return null
+
+	try {
+		return { event, data: JSON.parse(data) }
+	} catch {
+		return null
+	}
+}
 
 function App() {
 	const [user, setUser] = useState(null)
@@ -29,8 +62,9 @@ function App() {
 	const [summary, setSummary] = useState(null)
 	const [summaryOpen, setSummaryOpen] = useState(null)
 	const [syncingBalance, setSyncingBalance] = useState(false)
+	const retryRef = useRef(null)
+	const abortRef = useRef(null)
 
-	// ── Auth bootstrap ──────────────────────────────────────────────────────
 	useEffect(() => {
 		if (!getToken()) {
 			setAuthLoading(false)
@@ -52,47 +86,77 @@ function App() {
 		window.scrollTo({ top: 0, behavior: "smooth" })
 	}, [activeScreen])
 
-	// ── Polling do dashboard ────────────────────────────────────────────────
-	const intervalRef = useRef(null)
-	const failCountRef = useRef(0)
-
-	const fetchAll = async () => {
-		if (document.visibilityState === "hidden") return
-
-		const status = await loadStatus()
-
-		if (!status) {
-			failCountRef.current += 1
-			// Só para o polling após 5 falhas consecutivas (servidor realmente offline)
-			if (failCountRef.current >= 5) {
-				clearInterval(intervalRef.current)
-				intervalRef.current = null
-			}
-			return
-		}
-
-		failCountRef.current = 0
-		setData(status)
-		const sum = await loadSummary()
-		if (sum?.summary) {
-			setSummary(sum.summary)
-			setSummaryOpen(sum.summaryOpen)
-		}
-	}
-
 	useEffect(() => {
 		if (!user || !botConfigured) return
-		fetchAll()
-		intervalRef.current = setInterval(fetchAll, 3000)
-		const onVisible = () => { if (document.visibilityState === "visible") fetchAll() }
-		document.addEventListener("visibilitychange", onVisible)
+
+		let cancelled = false
+		const controller = new AbortController()
+		abortRef.current = controller
+
+		const connect = async () => {
+			try {
+				const res = await fetch(`${API_URL}/bot/stream`, {
+					headers: authHeaders(),
+					signal: controller.signal,
+				})
+
+				if (!res.ok || !res.body) {
+					throw new Error("stream unavailable")
+				}
+
+				const reader = res.body.getReader()
+				const decoder = new TextDecoder()
+				let buffer = ""
+
+				while (!cancelled) {
+					const { value, done } = await reader.read()
+					if (done) break
+
+					buffer += decoder.decode(value, { stream: true })
+
+					let boundary = buffer.indexOf("\n\n")
+					while (boundary !== -1) {
+						const block = buffer.slice(0, boundary)
+						buffer = buffer.slice(boundary + 2)
+						const parsed = parseSseBlock(block)
+
+						if (parsed?.event === "snapshot") {
+							setData(parsed.data.status)
+							setSummary(parsed.data.summary)
+							setSummaryOpen(parsed.data.summaryOpen)
+						} else if (parsed?.event === "state") {
+							setData((prev) => mergeDashboardState(prev, parsed.data))
+						} else if (parsed?.event === "summary") {
+							setSummary(parsed.data.summary)
+							setSummaryOpen(parsed.data.summaryOpen)
+						}
+
+						boundary = buffer.indexOf("\n\n")
+					}
+				}
+
+				if (!cancelled && !controller.signal.aborted) {
+					retryRef.current = window.setTimeout(connect, 2000)
+				}
+			} catch {
+				if (cancelled || controller.signal.aborted) return
+				retryRef.current = window.setTimeout(connect, 2000)
+			}
+		}
+
+		connect()
+
 		return () => {
-			clearInterval(intervalRef.current)
-			document.removeEventListener("visibilitychange", onVisible)
+			cancelled = true
+			controller.abort()
+			abortRef.current = null
+			if (retryRef.current) {
+				window.clearTimeout(retryRef.current)
+				retryRef.current = null
+			}
 		}
 	}, [user, botConfigured])
 
-	// ── Handlers ────────────────────────────────────────────────────────────
 	const handleAuth = async (u) => {
 		setUser(u)
 		const me = await getMe()
@@ -103,22 +167,25 @@ function App() {
 		clearToken()
 		setUser(null)
 		setData(null)
+		setSummary(null)
+		setSummaryOpen(null)
 		setActiveScreen("home")
 	}
 
-	const handleStart = async () => { await startBot(); fetchAll() }
-	const handleStop = async () => { await stopBot(); fetchAll() }
+	const handleStart = async () => {
+		await startBot()
+	}
+
+	const handleStop = async () => {
+		await stopBot()
+	}
+
 	const handleSyncBalance = async () => {
 		setSyncingBalance(true)
 		try {
 			const result = await loadBalance()
 			if (result && typeof result.balance === "number") {
-				setData((prev) => (
-					prev
-						? { ...prev, state: { ...prev.state, balance: result.balance } }
-						: prev
-				))
-				await fetchAll()
+				setData((prev) => mergeDashboardState(prev, { state: { balance: result.balance } }))
 			}
 		} finally {
 			setSyncingBalance(false)
@@ -148,7 +215,6 @@ function App() {
 		},
 	]
 
-	// ── Render ───────────────────────────────────────────────────────────────
 	if (authLoading) return <div className="loading-screen">Carregando...</div>
 
 	if (!user) return <LoginPage onAuth={handleAuth} />
@@ -175,7 +241,7 @@ function App() {
 				<SettingsPage
 					config={data?.config}
 					user={user}
-					onSaved={() => { setShowSettings(false); fetchAll() }}
+					onSaved={() => setShowSettings(false)}
 					onClose={() => setShowSettings(false)}
 				/>
 			)}

@@ -1,5 +1,6 @@
 import Binance from "node-binance-api"
 import type { Position } from "../positions/position.model.js"
+import { dashboardEvents } from "./dashboard-events.js"
 
 export interface BotConfig {
 	cycleIntervalMs: number
@@ -80,6 +81,14 @@ export class BotRuntime {
 		this._price = price
 		this._lastPriceUpdate = Date.now()
 		this.state.currentPrice = price
+		dashboardEvents.emitForUser(this.userId, {
+			type: "state",
+			payload: {
+				state: {
+					currentPrice: price,
+				},
+			},
+		})
 	}
 
 	getLastPriceUpdate(): number | null {
@@ -103,6 +112,10 @@ export class BotRuntime {
 		if (this._isRunning) return
 		this._isRunning = true
 		console.log(`▶️ [${this.userId}] Bot iniciado (${this.config.symbol})`)
+		dashboardEvents.emitForUser(this.userId, {
+			type: "state",
+			payload: { running: true },
+		})
 		await this._loop()
 	}
 
@@ -113,6 +126,10 @@ export class BotRuntime {
 			this._timeoutId = null
 		}
 		console.log(`⏹️ [${this.userId}] Bot pausado`)
+		dashboardEvents.emitForUser(this.userId, {
+			type: "state",
+			payload: { running: false },
+		})
 	}
 
 	private async _loop(): Promise<void> {
